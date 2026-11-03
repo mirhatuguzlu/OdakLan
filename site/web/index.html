@@ -35,20 +35,52 @@
     }
     @keyframes pulse { from { opacity: .4 } to { opacity: 1 } }
     @media (prefers-reduced-motion: reduce) { #splash { animation: none } }
+    #load-error {
+      display: none; position: fixed; inset: auto 16px 15vh; text-align: center;
+      font: 16px/1.5 system-ui, sans-serif; color: #8A8AA3;
+    }
+    #load-error.show { display: block; }
+    #load-error code { color: #00F0FF; }
   </style>
 </head>
 <body>
   <div id="splash" aria-hidden="true">OdakLan</div>
+  <div id="load-error" role="alert"></div>
   <!-- Crawlers and no-JS visitors still get the pitch. -->
   <noscript>
     <h1>OdakLan — Kaydırma. Odaklan. Şehrini kur.</h1>
     <p>Telefona dokunmadan geçirdiğin her dakika sana Enerji kazandırır. Arkadaşlarınla Odak Klanı kur; biri sosyal medyaya dalarsa ortak kale hasar alır.</p>
   </noscript>
   <script>
-    // Remove the HTML splash once Flutter paints its first frame.
-    window.addEventListener('flutter-first-frame', () => {
-      document.getElementById('splash')?.remove();
-    });
+    (() => {
+      const splash = document.getElementById('splash');
+      const error = document.getElementById('load-error');
+      let loaded = false;
+      // Never leave the splash pulsing forever: stop it and explain.
+      const fail = (html) => {
+        if (loaded) return;
+        splash.style.animation = 'none';
+        error.innerHTML = html;
+        error.classList.add('show');
+      };
+      window.addEventListener('flutter-first-frame', () => {
+        loaded = true;
+        splash.remove();
+        error.remove();
+      });
+      if (location.protocol === 'file:') {
+        // Browsers block Flutter's JS/Wasm loading from file:// URLs.
+        fail('Bu sayfa dosyadan açılamaz. Proje klasöründe ' +
+             '<code>cd site &amp;&amp; flutter run -d chrome</code> çalıştırın.');
+        return;
+      }
+      setTimeout(() => fail('Site yüklenemedi. Sayfayı yenilemeyi deneyin.'), 15000);
+      window.addEventListener('error', (e) => {
+        if (e.target instanceof HTMLScriptElement) {
+          fail('Site dosyaları yüklenemedi. Sayfayı yenilemeyi deneyin.');
+        }
+      }, true);
+    })();
   </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
