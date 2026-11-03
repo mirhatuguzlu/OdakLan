@@ -16,6 +16,8 @@ const description =
   "OdakLan, telefona dokunmadan geçirdiğin her dakikayı oyuna çeviren bir odak RPG'si. Arkadaşlarınla Odak Klanı kur, birlikte odaklan.";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://mirhatuguzlu.github.io/OdakLan/"),
+  alternates: { canonical: "/" },
   title,
   description,
   openGraph: { title, description, type: "website", locale: "tr_TR" },

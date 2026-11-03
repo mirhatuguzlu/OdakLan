@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Ban, Building2, Flame, Lock, Radar, ShieldCheck, Sparkles, Timer, Users,
   type LucideIcon,
@@ -18,44 +16,30 @@ const ICONS: Record<string, LucideIcon> = {
 };
 
 const STATUS: Record<FeatureStatus, [string, string]> = {
-  live: ["Yayında", "text-ok"],
-  inProgress: ["Geliştiriliyor", "text-pink"],
-  planned: ["Yakında", "text-muted"],
+  live: ["Yayında", "border-ok/40 text-ok"],
+  inProgress: ["Geliştiriliyor", "border-accent/40 text-accent"],
+  planned: ["Yakında", "border-line text-muted"],
 };
 
-/** Card with a cursor-following neon spotlight. */
 export function FeatureCard({ feature }: { feature: Feature }) {
   const Icon = ICONS[feature.id] ?? Sparkles;
-  const [label, color] = STATUS[feature.status];
+  const [label, badge] = STATUS[feature.status];
 
   return (
-    <article
-      onPointerMove={(e) => {
-        const r = e.currentTarget.getBoundingClientRect();
-        e.currentTarget.style.setProperty("--x", `${e.clientX - r.left}px`);
-        e.currentTarget.style.setProperty("--y", `${e.clientY - r.top}px`);
-      }}
-      className="group relative h-full overflow-hidden rounded-2xl border border-line bg-surface/75 p-6 backdrop-blur transition duration-300 hover:-translate-y-1.5 hover:border-cyan/70 hover:shadow-[0_0_32px_rgba(0,240,255,0.2)]"
-    >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        style={{
-          background:
-            "radial-gradient(260px circle at var(--x) var(--y), rgba(0,240,255,0.12), transparent 70%)",
-        }}
-      />
-      <div className="relative">
-        <div className="flex items-center">
-          <Icon className="text-cyan" size={30} aria-hidden />
-          <span className={`ml-auto text-xs font-bold ${color}`}>{label}</span>
-        </div>
-        <h3 className="mt-5 font-display text-xl font-bold">{feature.title}</h3>
-        <p className="mt-2 leading-relaxed text-muted">{feature.description}</p>
-        {feature.platformNote && (
-          <p className="mt-3 text-xs font-semibold text-pink">{feature.platformNote}</p>
-        )}
+    <article className="h-full rounded-xl border border-line bg-surface p-6 transition-colors duration-200 hover:border-muted/50 hover:bg-raised">
+      <div className="flex items-center">
+        <span className="grid size-10 place-items-center rounded-lg bg-raised">
+          <Icon className="text-ink" size={20} aria-hidden />
+        </span>
+        <span className={`ml-auto rounded-full border px-2.5 py-0.5 text-xs font-medium ${badge}`}>
+          {label}
+        </span>
       </div>
+      <h3 className="mt-5 font-display text-lg font-semibold">{feature.title}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-muted">{feature.description}</p>
+      {feature.platformNote && (
+        <p className="mt-3 text-xs font-medium text-muted">● {feature.platformNote}</p>
+      )}
     </article>
   );
 }

@@ -1,24 +1,30 @@
 @import "tailwindcss";
 
-/* Same palette as mobile/lib/app/theme.dart — keep them in sync. */
+/*
+ * Same palette as mobile/lib/app/theme.dart — keep them in sync.
+ * One accent (amber = Enerji); green/red only carry game meaning
+ * (focused / fortress damage). No decorative gradients.
+ */
 @theme {
-  --color-bg: #0b0b14;
-  --color-surface: #151527;
-  --color-line: #2a2a45;
-  --color-ink: #e8e8f0;
-  --color-muted: #8a8aa3;
-  --color-cyan: #00f0ff;
-  --color-pink: #ff2e88;
-  --color-violet: #8b5cff;
-  --color-ok: #3dff9a;
-  --color-danger: #ff4d4d;
+  --color-bg: #0d0e11;
+  --color-surface: #16181d;
+  --color-raised: #1d2026;
+  --color-line: #2a2d35;
+  --color-ink: #ecedef;
+  --color-muted: #8b8f98;
+  --color-accent: #f5a524;
+  --color-ok: #3ccb7f;
+  --color-danger: #f0564a;
   --font-sans: var(--font-body);
   --font-display: var(--font-display);
 }
 
 html {
   scroll-behavior: smooth;
-  background: var(--color-bg);
+  background-color: var(--color-bg);
+  /* Faint dot grid, fading out below the hero. */
+  background-image: radial-gradient(rgb(255 255 255 / 0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
   color-scheme: dark;
 }
 
@@ -26,19 +32,12 @@ html {
   html { scroll-behavior: auto; }
 }
 
-/* No body background: it would paint over the fixed -z-10 NeonGrid canvas. */
 body {
   color: var(--color-ink);
+  background: linear-gradient(to bottom, transparent 0, var(--color-bg) 900px);
 }
 
 /* Sections stop below the sticky nav when jumped to. */
 section[id] { scroll-margin-top: 5rem; }
 
-.text-brand {
-  background: linear-gradient(90deg, var(--color-cyan), var(--color-violet), var(--color-pink));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-::selection { background: color-mix(in srgb, var(--color-pink) 40%, transparent); }
+::selection { background: color-mix(in srgb, var(--color-accent) 35%, transparent); }

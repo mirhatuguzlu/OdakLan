@@ -26,7 +26,7 @@ export function ClanDemo() {
     const unsub = clock.on("change", setT);
     const controls = reduce
       ? undefined
-      : animate(clock, [0, 1], { duration: 7, ease: "linear", repeat: Infinity });
+      : animate(clock, [0, 1], { duration: 8, ease: "linear", repeat: Infinity });
     return () => {
       unsub();
       controls?.stop();
@@ -35,47 +35,56 @@ export function ClanDemo() {
 
   const hp = hpAt(t);
   const hit = t >= 0.3 && t < 0.55;
-  // Red at 0.65 HP → green at full.
-  const hue = Math.round(((hp - 0.65) / 0.35) * 150);
-  const color = `hsl(${hue} 100% 60%)`;
+  const damaged = hp < 0.95;
 
   return (
-    <div
-      className={`rounded-3xl border bg-surface/85 p-6 backdrop-blur transition-colors duration-300 ${
-        hit ? "border-danger" : "border-line"
-      }`}
-    >
+    <div className="rounded-xl border border-line bg-surface p-6">
       <div className="flex items-center gap-3">
-        <Castle size={34} style={{ color }} />
-        <span className="font-display text-xl font-bold">Neon Kale</span>
-        <span className="ml-auto font-semibold tabular-nums" style={{ color }}>
-          {Math.round(hp * 100)} HP
+        <span className="grid size-10 place-items-center rounded-lg bg-raised">
+          <Castle size={20} aria-hidden />
+        </span>
+        <div>
+          <p className="font-display font-semibold">Neon Kale</p>
+          <p className="text-xs text-muted">4 üye · Klan seviyesi 3</p>
+        </div>
+        <span
+          className={`ml-auto font-semibold tabular-nums ${damaged ? "text-danger" : "text-ok"}`}
+        >
+          {Math.round(hp * 100)} / 100
         </span>
       </div>
       <div
-        className="mt-4 h-3 overflow-hidden rounded-full bg-line"
+        className="mt-5 h-2 overflow-hidden rounded-full bg-line"
         role="progressbar"
         aria-label="Kale canı"
         aria-valuenow={Math.round(hp * 100)}
         aria-valuemin={0}
         aria-valuemax={100}
       >
-        <div className="h-full rounded-full" style={{ width: `${hp * 100}%`, background: color }} />
+        <div
+          className={`h-full rounded-full transition-colors duration-300 ${damaged ? "bg-danger" : "bg-ok"}`}
+          style={{ width: `${hp * 100}%` }}
+        />
       </div>
-      <ul className="mt-5 space-y-3">
-        {MEMBERS.map((m) => (
-          <li key={m} className="flex items-center gap-3">
-            <span className="grid size-7 place-items-center rounded-full bg-violet/30 text-xs">
-              {m[0]}
-            </span>
-            {m}
-            {m === "Mert" && hit ? (
-              <span className="ml-auto font-bold text-danger">TikTok&apos;a girdi! −35 HP</span>
-            ) : (
-              <span className="ml-auto text-ok">odaklanıyor</span>
-            )}
-          </li>
-        ))}
+      <ul className="mt-5 divide-y divide-line">
+        {MEMBERS.map((m) => {
+          const slipped = m === "Mert" && hit;
+          return (
+            <li key={m} className="flex items-center gap-3 py-2.5 text-sm">
+              <span className="grid size-7 place-items-center rounded-full bg-raised text-xs text-muted">
+                {m[0]}
+              </span>
+              {m}
+              <span className={`ml-auto flex items-center gap-1.5 ${slipped ? "text-danger" : "text-muted"}`}>
+                <span
+                  className={`size-1.5 rounded-full ${slipped ? "bg-danger" : "bg-ok"}`}
+                  aria-hidden
+                />
+                {slipped ? "TikTok açtı · −35" : "Odakta"}
+              </span>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

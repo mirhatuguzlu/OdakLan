@@ -24,9 +24,8 @@ class PlaceholderScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 72, color: AppColors.neonCyan)
+            Icon(icon, size: 72, color: AppColors.accent)
                 .animate(onPlay: (c) => c.repeat(reverse: true))
-                .shimmer(duration: 1800.ms, color: AppColors.neonPink)
                 .scaleXY(begin: 0.95, end: 1.05, duration: 1800.ms),
             const SizedBox(height: 16),
             Text(hint, style: const TextStyle(color: AppColors.textMuted)),

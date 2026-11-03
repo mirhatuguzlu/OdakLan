@@ -6,38 +6,37 @@ import { manifest } from "@/content/manifest";
 import { PhoneMock } from "./PhoneMock";
 
 const ease = [0.22, 1, 0.36, 1] as const;
-const LINES = ["Kaydırma.", "Odaklan.", "Şehrini kur."];
 
 export function Hero() {
   const done = manifest.roadmap.filter((s) => s.done).length;
+  const fadeUp = (delay: number) => ({
+    initial: { opacity: 0, y: 16 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.6, delay, ease },
+  });
+
   return (
-    <section className="mx-auto flex max-w-6xl flex-col items-center gap-14 px-4 py-16 sm:px-6 lg:flex-row lg:py-28">
+    <section className="mx-auto flex max-w-6xl flex-col items-center gap-16 px-4 py-16 sm:px-6 lg:flex-row lg:py-28">
       <div className="flex-1 text-center lg:text-left">
         <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease }}
-          className="inline-block rounded-full border border-pink/50 bg-pink/10 px-3.5 py-1.5 text-sm font-semibold text-pink"
+          {...fadeUp(0)}
+          className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-sm text-muted"
         >
+          <span className="size-1.5 rounded-full bg-accent" aria-hidden />
           v{manifest.appVersion} · Geliştiriliyor · {done}/{manifest.roadmap.length} adım
         </motion.p>
-        <h1 className="mt-6 font-display text-5xl leading-[0.95] font-bold tracking-tight sm:text-7xl">
-          {LINES.map((line, i) => (
-            <motion.span
-              key={line}
-              className="text-brand block pb-1"
-              initial={{ opacity: 0, y: 30, filter: "blur(8px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ duration: 0.7, delay: 0.1 + i * 0.12, ease }}
-            >
-              {line}
-            </motion.span>
-          ))}
-        </h1>
+        <motion.h1
+          {...fadeUp(0.08)}
+          className="mt-6 font-display text-5xl leading-[1.02] font-bold tracking-tight sm:text-7xl"
+        >
+          Kaydırma.
+          <br />
+          <span className="text-accent">Odaklan.</span>
+          <br />
+          <span className="text-muted">Şehrini kur.</span>
+        </motion.h1>
         <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
+          {...fadeUp(0.18)}
           className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted lg:mx-0"
         >
           OdakLan, telefona dokunmadan geçirdiğin her dakikayı oyuna çeviren bir odak
@@ -45,14 +44,12 @@ export function Hero() {
           hasar alır.
         </motion.p>
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.65, ease }}
+          {...fadeUp(0.28)}
           className="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start"
         >
           <a
             href="#ozellikler"
-            className="inline-flex items-center gap-2 rounded-full bg-cyan px-6 py-3.5 font-bold text-bg transition hover:shadow-[0_0_28px_rgba(0,240,255,0.6)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan"
+            className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-3 font-semibold text-bg transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           >
             <ArrowDown size={18} aria-hidden /> Nasıl çalışır?
           </a>
@@ -61,9 +58,9 @@ export function Hero() {
             <span
               key={s}
               aria-disabled="true"
-              className="rounded-full border border-line px-6 py-3.5 text-muted"
+              className="rounded-lg border border-line px-5 py-3 text-muted"
             >
-              {s} — yakında
+              {s} · yakında
             </span>
           ))}
         </motion.div>

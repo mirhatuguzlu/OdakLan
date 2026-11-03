@@ -29,4 +29,4 @@ cd site && npm run build              # site, statik çıktı: site/out
 
 ## Yayın
 
-`.github/workflows/site.yml` her push'ta `site/` klasörünü derleyip GitHub Pages'e yükler. Bir kerelik ayar: repo → Settings → Pages → Source: **GitHub Actions**.
+Site adresi: https://mirhatuguzlu.github.io/OdakLan/ — `.github/workflows/site.yml` her push'ta `site/` klasörünü derleyip GitHub Pages'e yükler. Bir kerelik ayar: repo → Settings → Pages → Source: **GitHub Actions**.
