@@ -1,0 +1,11 @@
+name: odaklan_core
+description: Shared OdakLan game rules and feature manifest for the app and the website.
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.12.2
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.6

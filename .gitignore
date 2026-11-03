@@ -4,3 +4,5 @@
 *.iml
 .env*
 !.env.example
+.dart_tool/
+build/
