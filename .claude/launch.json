@@ -4,7 +4,7 @@
     {
       "name": "site",
       "runtimeExecutable": "cmd",
-      "runtimeArgs": ["/c", "cd site && flutter run -d web-server --web-port 8099 --release"],
+      "runtimeArgs": ["/c", "cd site && npm run dev -- -p 8099"],
       "port": 8099
     }
   ]

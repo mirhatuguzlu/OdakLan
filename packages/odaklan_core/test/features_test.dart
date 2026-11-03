@@ -1,7 +1,20 @@
+import 'dart:io';
+
 import 'package:odaklan_core/odaklan_core.dart';
 import 'package:test/test.dart';
 
+import '../tool/export_manifest.dart' show manifestPath;
+
 void main() {
+  test('website manifest.json is up to date', () {
+    final onDisk = File(manifestPath).readAsStringSync().replaceAll('\r\n', '\n');
+    expect(
+      onDisk,
+      manifestJson(),
+      reason: 'Run: dart run tool/export_manifest.dart',
+    );
+  });
+
   test('feature ids are unique (website maps them to icons)', () {
     final ids = features.map((f) => f.id).toList();
     expect(ids.toSet().length, ids.length);

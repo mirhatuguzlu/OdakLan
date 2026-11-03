@@ -1,10 +1,31 @@
 /// Single source of truth for what OdakLan offers.
 ///
-/// Update this file in every development step: the website renders its
-/// feature grid and roadmap from it.
+/// Update this file in every development step, then run
+/// `dart run tool/export_manifest.dart` so the website picks it up.
 library;
 
+import 'dart:convert';
+
 enum FeatureStatus { live, inProgress, planned }
+
+/// The manifest as the website consumes it (site/src/content/manifest.json).
+String manifestJson() => '${const JsonEncoder.withIndent('  ').convert({
+  'appVersion': appVersion,
+  'features': [
+    for (final f in features)
+      {
+        'id': f.id,
+        'title': f.title,
+        'description': f.description,
+        'status': f.status.name,
+        'platformNote': ?f.platformNote,
+      },
+  ],
+  'roadmap': [
+    for (final s in roadmap)
+      {'number': s.number, 'title': s.title, 'done': s.done},
+  ],
+})}\n';
 
 class Feature {
   const Feature({

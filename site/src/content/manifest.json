@@ -1,0 +1,101 @@
+{
+  "appVersion": "0.1.0",
+  "features": [
+    {
+      "id": "focus_session",
+      "title": "Odak Seansı",
+      "description": "Telefona dokunmadan geçen her 10 dakika sana Enerji ve XP kazandırır.",
+      "status": "planned"
+    },
+    {
+      "id": "anti_doomscroll",
+      "title": "Kaydırma Kalkanı",
+      "description": "Seans sırasında uygulamadan çıkarsan seans bozulur, ödül kaybolur.",
+      "status": "planned"
+    },
+    {
+      "id": "city",
+      "title": "Siber Şehrin",
+      "description": "Kazandığın Enerji ile neon şehrini kur, binalarını seviye atlat.",
+      "status": "planned"
+    },
+    {
+      "id": "clans",
+      "title": "Odak Klanları",
+      "description": "Arkadaşlarınla klan kur. Biri kaydırmaya dalarsa ortak kale hasar alır.",
+      "status": "planned"
+    },
+    {
+      "id": "fair_rewards",
+      "title": "Hilesiz Ödüller",
+      "description": "Ödüller sunucuda, sunucu saatiyle hesaplanır; saat oynatmak işe yaramaz.",
+      "status": "planned"
+    },
+    {
+      "id": "quests",
+      "title": "Seriler ve Görevler",
+      "description": "Günlük görevler ve odak serileriyle her gün geri gel.",
+      "status": "planned"
+    },
+    {
+      "id": "social_detect",
+      "title": "Sosyal Medya Dedektörü",
+      "description": "Seans sırasında Instagram veya TikTok açılırsa klanın anında haberdar olur.",
+      "status": "planned",
+      "platformNote": "Yalnızca Android"
+    },
+    {
+      "id": "privacy",
+      "title": "Gizlilik Önce",
+      "description": "Yalnızca e-posta ve takma ad. Mesajlarına, galerine dokunmayız. KVKK uyumlu.",
+      "status": "planned"
+    }
+  ],
+  "roadmap": [
+    {
+      "number": 1,
+      "title": "Uygulama ve site iskeleti",
+      "done": true
+    },
+    {
+      "number": 2,
+      "title": "Odak motoru ve zamanlayıcı",
+      "done": false
+    },
+    {
+      "number": 3,
+      "title": "Siber şehir ve seviyeler",
+      "done": false
+    },
+    {
+      "number": 4,
+      "title": "Hesaplar ve güvenli veritabanı",
+      "done": false
+    },
+    {
+      "number": 5,
+      "title": "Sunucu doğrulamalı seanslar",
+      "done": false
+    },
+    {
+      "number": 6,
+      "title": "Odak Klanları ve ortak kale",
+      "done": false
+    },
+    {
+      "number": 7,
+      "title": "Bildirimler, seriler, görevler",
+      "done": false
+    },
+    {
+      "number": 8,
+      "title": "Sosyal medya dedektörü (Android)",
+      "done": false
+    },
+    {
+      "number": 9,
+      "title": "Güvenlik sıkılaştırma ve yayın",
+      "done": false
+    }
+  ]
+}

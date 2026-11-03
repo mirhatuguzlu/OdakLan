@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+/* Same palette as mobile/lib/app/theme.dart — keep them in sync. */
+@theme {
+  --color-bg: #0b0b14;
+  --color-surface: #151527;
+  --color-line: #2a2a45;
+  --color-ink: #e8e8f0;
+  --color-muted: #8a8aa3;
+  --color-cyan: #00f0ff;
+  --color-pink: #ff2e88;
+  --color-violet: #8b5cff;
+  --color-ok: #3dff9a;
+  --color-danger: #ff4d4d;
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--color-bg);
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+/* No body background: it would paint over the fixed -z-10 NeonGrid canvas. */
+body {
+  color: var(--color-ink);
+}
+
+/* Sections stop below the sticky nav when jumped to. */
+section[id] { scroll-margin-top: 5rem; }
+
+.text-brand {
+  background: linear-gradient(90deg, var(--color-cyan), var(--color-violet), var(--color-pink));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+::selection { background: color-mix(in srgb, var(--color-pink) 40%, transparent); }

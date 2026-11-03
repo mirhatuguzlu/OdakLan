@@ -6,5 +6,4 @@ environment:
 
 workspace:
   - mobile
-  - site
   - packages/odaklan_core
