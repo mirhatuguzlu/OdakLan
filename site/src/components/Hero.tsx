@@ -48,7 +48,7 @@ export function Hero() {
           className="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start"
         >
           <a
-            href="#ozellikler"
+            href="#nasil-calisir"
             className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-3 font-semibold text-bg transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           >
             <ArrowDown size={18} aria-hidden /> Nasıl çalışır?

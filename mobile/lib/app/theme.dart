@@ -24,8 +24,18 @@ ThemeData buildTheme() {
         primary: AppColors.accent,
         onPrimary: AppColors.background,
         secondary: AppColors.success,
+        // Selected chips/segments: neutral fill, amber text.
+        secondaryContainer: AppColors.raised,
+        onSecondaryContainer: AppColors.accent,
         surface: AppColors.surface,
         onSurface: AppColors.text,
+        // Neutral containers: the amber seed would tint dialogs/sheets brown.
+        surfaceTint: Colors.transparent,
+        surfaceContainerLowest: AppColors.background,
+        surfaceContainerLow: AppColors.surface,
+        surfaceContainer: AppColors.surface,
+        surfaceContainerHigh: AppColors.raised,
+        surfaceContainerHighest: AppColors.raised,
         error: AppColors.danger,
         outline: AppColors.border,
       );

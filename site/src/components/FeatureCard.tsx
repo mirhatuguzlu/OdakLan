@@ -17,6 +17,7 @@ const ICONS: Record<string, LucideIcon> = {
 
 const STATUS: Record<FeatureStatus, [string, string]> = {
   live: ["Yayında", "border-ok/40 text-ok"],
+  ready: ["Uygulamada hazır", "border-ok/40 text-ok"],
   inProgress: ["Geliştiriliyor", "border-accent/40 text-accent"],
   planned: ["Yakında", "border-line text-muted"],
 };

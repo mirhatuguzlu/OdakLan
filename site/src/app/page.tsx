@@ -2,10 +2,12 @@ import { Check, Menu, TrendingDown, UserPlus, Wrench, Trophy, Zap } from "lucide
 import { ClanDemo } from "@/components/ClanDemo";
 import { FeatureCard } from "@/components/FeatureCard";
 import { Hero } from "@/components/Hero";
+import { HowItWorks } from "@/components/HowItWorks";
 import { Reveal } from "@/components/Reveal";
 import { manifest } from "@/content/manifest";
 
 const NAV = [
+  ["#nasil-calisir", "Nasıl çalışır"],
   ["#ozellikler", "Özellikler"],
   ["#klanlar", "Klanlar"],
   ["#yol-haritasi", "Yol haritası"],
@@ -17,6 +19,7 @@ export default function Home() {
       <Nav />
       <main>
         <Hero />
+        <How />
         <Features />
         <Clans />
         <Roadmap />
@@ -70,6 +73,19 @@ function SectionTitle({ eyebrow, title, subtitle }: { eyebrow: string; title: st
       <h2 className="mt-3 font-display text-3xl font-bold tracking-tight sm:text-4xl">{title}</h2>
       <p className="mx-auto mt-3 max-w-2xl text-lg text-muted">{subtitle}</p>
     </Reveal>
+  );
+}
+
+function How() {
+  return (
+    <section id="nasil-calisir" className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
+      <SectionTitle
+        eyebrow="Nasıl çalışır"
+        title="Basit kurallar, gerçek sonuçlar"
+        subtitle="Odaklandığın süre ödüle dönüşür; kaçtığın an seans biter."
+      />
+      <HowItWorks />
+    </section>
   );
 }
 

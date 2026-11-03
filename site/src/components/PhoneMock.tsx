@@ -47,6 +47,16 @@ export function PhoneMock() {
                 cx="100" cy="100" r={R} fill="none" stroke="#f5a524" strokeWidth="10"
                 strokeLinecap="round" strokeDasharray={C} style={{ strokeDashoffset: dashOffset }}
               />
+              {/* Enerji block markers, like the app's ring (every 10 of 25 min). */}
+              {[0.4, 0.8].map((f) => (
+                <circle
+                  key={f}
+                  cx={100 + R * Math.cos(2 * Math.PI * f)}
+                  cy={100 + R * Math.sin(2 * Math.PI * f)}
+                  r="3"
+                  fill={p >= f ? "#0d0e11" : "#4a4f5a"}
+                />
+              ))}
             </svg>
             <span className="absolute inset-0 grid place-items-center font-display text-4xl font-bold tabular-nums">
               {minutesLeft} dk

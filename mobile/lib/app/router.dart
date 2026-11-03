@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/focus/focus_screen.dart';
 import '../features/shell/home_shell.dart';
 import '../features/shell/placeholder_screen.dart';
 
@@ -12,14 +13,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => HomeShell(shell: shell),
         branches: [
-          _branch(
-            '/focus',
-            const PlaceholderScreen(
-              title: 'Odak',
-              hint: 'Odak zamanlayıcısı — adım 2',
-              icon: Icons.timer_outlined,
-            ),
-          ),
+          _branch('/focus', const FocusScreen()),
           _branch(
             '/city',
             const PlaceholderScreen(

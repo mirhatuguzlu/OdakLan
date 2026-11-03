@@ -7,7 +7,9 @@ import '../tool/export_manifest.dart' show manifestPath;
 
 void main() {
   test('website manifest.json is up to date', () {
-    final onDisk = File(manifestPath).readAsStringSync().replaceAll('\r\n', '\n');
+    final onDisk = File(
+      manifestPath,
+    ).readAsStringSync().replaceAll('\r\n', '\n');
     expect(
       onDisk,
       manifestJson(),

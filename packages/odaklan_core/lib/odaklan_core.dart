@@ -3,3 +3,4 @@
 library;
 
 export 'src/features.dart';
+export 'src/focus.dart';

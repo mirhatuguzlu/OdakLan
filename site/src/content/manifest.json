@@ -1,17 +1,67 @@
 {
-  "appVersion": "0.1.0",
+  "appVersion": "0.2.0",
+  "focusRules": {
+    "energyBlockMinutes": 10,
+    "leaveGraceSeconds": 10,
+    "presets": [
+      {
+        "minutes": 10,
+        "completed": {
+          "energy": 2,
+          "xp": 20
+        },
+        "brokenAtHalf": {
+          "energy": 0,
+          "xp": 5
+        }
+      },
+      {
+        "minutes": 25,
+        "completed": {
+          "energy": 3,
+          "xp": 50
+        },
+        "brokenAtHalf": {
+          "energy": 1,
+          "xp": 12
+        }
+      },
+      {
+        "minutes": 45,
+        "completed": {
+          "energy": 5,
+          "xp": 90
+        },
+        "brokenAtHalf": {
+          "energy": 2,
+          "xp": 22
+        }
+      },
+      {
+        "minutes": 60,
+        "completed": {
+          "energy": 7,
+          "xp": 120
+        },
+        "brokenAtHalf": {
+          "energy": 3,
+          "xp": 30
+        }
+      }
+    ]
+  },
   "features": [
     {
       "id": "focus_session",
       "title": "Odak Seansı",
-      "description": "Telefona dokunmadan geçen her 10 dakika sana Enerji ve XP kazandırır.",
-      "status": "planned"
+      "description": "Her 10 dakikalık odak 1 Enerji. Seansı bitirirsen +1 bonus Enerji ve iki kat XP.",
+      "status": "ready"
     },
     {
       "id": "anti_doomscroll",
       "title": "Kaydırma Kalkanı",
-      "description": "Seans sırasında uygulamadan çıkarsan seans bozulur, ödül kaybolur.",
-      "status": "planned"
+      "description": "Telefonu kilitlemek serbest. Başka uygulamaya geçersen seans bozulur; tamamlanan bloklar yine senin.",
+      "status": "ready"
     },
     {
       "id": "city",
@@ -60,7 +110,7 @@
     {
       "number": 2,
       "title": "Odak motoru ve zamanlayıcı",
-      "done": false
+      "done": true
     },
     {
       "number": 3,

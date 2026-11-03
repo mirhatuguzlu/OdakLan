@@ -6,6 +6,12 @@
       "runtimeExecutable": "cmd",
       "runtimeArgs": ["/c", "cd site && npm run dev -- -p 8099"],
       "port": 8099
+    },
+    {
+      "name": "app-web",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "cd mobile && flutter run -d web-server --web-port 8100 --release"],
+      "port": 8100
     }
   ]
 }

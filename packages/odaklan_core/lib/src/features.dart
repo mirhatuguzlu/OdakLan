@@ -6,26 +6,31 @@ library;
 
 import 'dart:convert';
 
-enum FeatureStatus { live, inProgress, planned }
+import 'focus.dart';
+
+/// live = in the stores; ready = built in the app, not released yet.
+enum FeatureStatus { live, ready, inProgress, planned }
 
 /// The manifest as the website consumes it (site/src/content/manifest.json).
-String manifestJson() => '${const JsonEncoder.withIndent('  ').convert({
-  'appVersion': appVersion,
-  'features': [
-    for (final f in features)
-      {
-        'id': f.id,
-        'title': f.title,
-        'description': f.description,
-        'status': f.status.name,
-        'platformNote': ?f.platformNote,
+String manifestJson() =>
+    '${const JsonEncoder.withIndent('  ').convert({
+      'appVersion': appVersion,
+      'focusRules': {
+        'energyBlockMinutes': energyBlockMinutes,
+        'leaveGraceSeconds': leaveGrace.inSeconds,
+        'presets': [
+          for (final m in sessionPresetsMinutes) {'minutes': m, 'completed': _reward(rewardFor(Duration(minutes: m), completed: true)), 'brokenAtHalf': _reward(rewardFor(Duration(minutes: m ~/ 2), completed: false))},
+        ],
       },
-  ],
-  'roadmap': [
-    for (final s in roadmap)
-      {'number': s.number, 'title': s.title, 'done': s.done},
-  ],
-})}\n';
+      'features': [
+        for (final f in features) {'id': f.id, 'title': f.title, 'description': f.description, 'status': f.status.name, 'platformNote': ?f.platformNote},
+      ],
+      'roadmap': [
+        for (final s in roadmap) {'number': s.number, 'title': s.title, 'done': s.done},
+      ],
+    })}\n';
+
+Map<String, int> _reward(FocusReward r) => {'energy': r.energy, 'xp': r.xp};
 
 class Feature {
   const Feature({
@@ -54,22 +59,24 @@ class RoadmapStep {
   final bool done;
 }
 
-const appVersion = '0.1.0';
+const appVersion = '0.2.0';
 
 const features = <Feature>[
   Feature(
     id: 'focus_session',
     title: 'Odak Seansı',
     description:
-        'Telefona dokunmadan geçen her 10 dakika sana Enerji ve XP kazandırır.',
-    status: FeatureStatus.planned,
+        'Her $energyBlockMinutes dakikalık odak 1 Enerji. Seansı bitirirsen '
+        '+1 bonus Enerji ve iki kat XP.',
+    status: FeatureStatus.ready,
   ),
   Feature(
     id: 'anti_doomscroll',
     title: 'Kaydırma Kalkanı',
     description:
-        'Seans sırasında uygulamadan çıkarsan seans bozulur, ödül kaybolur.',
-    status: FeatureStatus.planned,
+        'Telefonu kilitlemek serbest. Başka uygulamaya geçersen seans bozulur; '
+        'tamamlanan bloklar yine senin.',
+    status: FeatureStatus.ready,
   ),
   Feature(
     id: 'city',
@@ -117,7 +124,7 @@ const features = <Feature>[
 
 const roadmap = <RoadmapStep>[
   RoadmapStep(1, 'Uygulama ve site iskeleti', done: true),
-  RoadmapStep(2, 'Odak motoru ve zamanlayıcı'),
+  RoadmapStep(2, 'Odak motoru ve zamanlayıcı', done: true),
   RoadmapStep(3, 'Siber şehir ve seviyeler'),
   RoadmapStep(4, 'Hesaplar ve güvenli veritabanı'),
   RoadmapStep(5, 'Sunucu doğrulamalı seanslar'),
