@@ -1,5 +1,5 @@
 {
-  "appVersion": "0.3.0",
+  "appVersion": "0.4.0",
   "focusRules": {
     "energyBlockMinutes": 10,
     "leaveGraceSeconds": 10,
@@ -131,6 +131,67 @@
       }
     ]
   },
+  "progress": {
+    "tags": [
+      "Ders",
+      "Kod",
+      "Okuma",
+      "İş",
+      "Üretim",
+      "Diğer"
+    ],
+    "stakes": [
+      {
+        "stake": 2,
+        "won": 3
+      },
+      {
+        "stake": 5,
+        "won": 7
+      },
+      {
+        "stake": 10,
+        "won": 15
+      }
+    ],
+    "freezeCost": 5,
+    "maxFreezes": 2,
+    "quests": [
+      {
+        "title": "2 seans tamamla",
+        "reward": 3
+      },
+      {
+        "title": "3 seans tamamla",
+        "reward": 5
+      },
+      {
+        "title": "Toplam 40 dakika odaklan",
+        "reward": 3
+      },
+      {
+        "title": "Toplam 90 dakika odaklan",
+        "reward": 6
+      },
+      {
+        "title": "45+ dakikalık bir seansı bitir",
+        "reward": 5
+      },
+      {
+        "title": "Sözleşmeli bir seansı kazan",
+        "reward": 4
+      },
+      {
+        "title": "Saat 10'dan önce bir seans bitir",
+        "reward": 4
+      },
+      {
+        "title": "2 farklı niyetle odaklan",
+        "reward": 4
+      }
+    ],
+    "questsPerDay": 3
+  },
   "features": [
     {
       "id": "focus_session",
@@ -151,6 +212,18 @@
       "status": "ready"
     },
     {
+      "id": "focus_contract",
+      "title": "Odak Sözleşmesi",
+      "description": "Kendine söz ver: Enerji yatır, seansı bitirirsen %50 fazlasıyla geri al. Kaçarsan yatırdığın gider.",
+      "status": "ready"
+    },
+    {
+      "id": "focus_map",
+      "title": "Odak Haritası",
+      "description": "Her seansa bir niyet ver. Haftalık grafik, 12 haftalık ısı haritası ve niyetlere göre dağılımla nereye odaklandığını gör.",
+      "status": "ready"
+    },
+    {
       "id": "clans",
       "title": "Odak Klanları",
       "description": "Arkadaşlarınla klan kur. Biri kaydırmaya dalarsa ortak kale hasar alır.",
@@ -165,8 +238,8 @@
     {
       "id": "quests",
       "title": "Seriler ve Görevler",
-      "description": "Günlük görevler ve odak serileriyle her gün geri gel.",
-      "status": "planned"
+      "description": "Her gün herkese aynı 3 görev. Serini koru; kaçırdığın bir günü Enerjiyle aldığın Seri Kalkanı kurtarır.",
+      "status": "ready"
     },
     {
       "id": "social_detect",
@@ -200,31 +273,36 @@
     },
     {
       "number": 4,
+      "title": "Seriler, görevler, Odak Sözleşmesi, istatistik",
+      "done": true
+    },
+    {
+      "number": 5,
       "title": "Hesaplar ve güvenli veritabanı",
       "done": false
     },
     {
-      "number": 5,
+      "number": 6,
       "title": "Sunucu doğrulamalı seanslar",
       "done": false
     },
     {
-      "number": 6,
+      "number": 7,
       "title": "Odak Klanları ve ortak kale",
       "done": false
     },
     {
-      "number": 7,
-      "title": "Bildirimler, seriler, görevler",
-      "done": false
-    },
-    {
       "number": 8,
-      "title": "Sosyal medya dedektörü (Android)",
+      "title": "Bildirimler ve hatırlatıcılar",
       "done": false
     },
     {
       "number": 9,
+      "title": "Sosyal medya dedektörü (Android)",
+      "done": false
+    },
+    {
+      "number": 10,
       "title": "Güvenlik sıkılaştırma ve yayın",
       "done": false
     }

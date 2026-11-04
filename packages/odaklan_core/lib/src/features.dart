@@ -8,6 +8,7 @@ import 'dart:convert';
 
 import 'city.dart';
 import 'focus.dart';
+import 'progress.dart';
 
 /// live = in the stores; ready = built in the app, not released yet.
 enum FeatureStatus { live, ready, inProgress, planned }
@@ -34,6 +35,18 @@ String manifestJson() =>
               'costs': [for (var l = 1; l <= b.maxLevel; l++) b.costToReach(l)],
             },
         ],
+      },
+      'progress': {
+        'tags': [for (final t in focusTags) t.label],
+        'stakes': [
+          for (final s in stakeOptions.where((s) => s > 0)) {'stake': s, 'won': stakePayout(s, completed: true)},
+        ],
+        'freezeCost': freezeCost,
+        'maxFreezes': maxFreezes,
+        'quests': [
+          for (final q in questPool) {'title': q.title, 'reward': q.reward},
+        ],
+        'questsPerDay': questsPerDay,
       },
       'features': [
         for (final f in features) {'id': f.id, 'title': f.title, 'description': f.description, 'status': f.status.name, 'platformNote': ?f.platformNote},
@@ -72,7 +85,7 @@ class RoadmapStep {
   final bool done;
 }
 
-const appVersion = '0.3.0';
+const appVersion = '0.4.0';
 
 const features = <Feature>[
   Feature(
@@ -100,6 +113,22 @@ const features = <Feature>[
     status: FeatureStatus.ready,
   ),
   Feature(
+    id: 'focus_contract',
+    title: 'Odak Sözleşmesi',
+    description:
+        'Kendine söz ver: Enerji yatır, seansı bitirirsen %50 fazlasıyla geri al. '
+        'Kaçarsan yatırdığın gider.',
+    status: FeatureStatus.ready,
+  ),
+  Feature(
+    id: 'focus_map',
+    title: 'Odak Haritası',
+    description:
+        'Her seansa bir niyet ver. Haftalık grafik, 12 haftalık ısı haritası ve '
+        'niyetlere göre dağılımla nereye odaklandığını gör.',
+    status: FeatureStatus.ready,
+  ),
+  Feature(
     id: 'clans',
     title: 'Odak Klanları',
     description:
@@ -116,8 +145,10 @@ const features = <Feature>[
   Feature(
     id: 'quests',
     title: 'Seriler ve Görevler',
-    description: 'Günlük görevler ve odak serileriyle her gün geri gel.',
-    status: FeatureStatus.planned,
+    description:
+        'Her gün herkese aynı 3 görev. Serini koru; kaçırdığın bir günü '
+        'Enerjiyle aldığın Seri Kalkanı kurtarır.',
+    status: FeatureStatus.ready,
   ),
   Feature(
     id: 'social_detect',
@@ -140,10 +171,11 @@ const roadmap = <RoadmapStep>[
   RoadmapStep(1, 'Uygulama ve site iskeleti', done: true),
   RoadmapStep(2, 'Odak motoru ve zamanlayıcı', done: true),
   RoadmapStep(3, 'Siber şehir ve seviyeler', done: true),
-  RoadmapStep(4, 'Hesaplar ve güvenli veritabanı'),
-  RoadmapStep(5, 'Sunucu doğrulamalı seanslar'),
-  RoadmapStep(6, 'Odak Klanları ve ortak kale'),
-  RoadmapStep(7, 'Bildirimler, seriler, görevler'),
-  RoadmapStep(8, 'Sosyal medya dedektörü (Android)'),
-  RoadmapStep(9, 'Güvenlik sıkılaştırma ve yayın'),
+  RoadmapStep(4, 'Seriler, görevler, Odak Sözleşmesi, istatistik', done: true),
+  RoadmapStep(5, 'Hesaplar ve güvenli veritabanı'),
+  RoadmapStep(6, 'Sunucu doğrulamalı seanslar'),
+  RoadmapStep(7, 'Odak Klanları ve ortak kale'),
+  RoadmapStep(8, 'Bildirimler ve hatırlatıcılar'),
+  RoadmapStep(9, 'Sosyal medya dedektörü (Android)'),
+  RoadmapStep(10, 'Güvenlik sıkılaştırma ve yayın'),
 ];

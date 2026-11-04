@@ -3,6 +3,7 @@ import { CityDemo } from "@/components/CityDemo";
 import { ClanDemo } from "@/components/ClanDemo";
 import { FeatureCard } from "@/components/FeatureCard";
 import { Hero } from "@/components/Hero";
+import { ProgressDemo } from "@/components/ProgressDemo";
 import { HowItWorks } from "@/components/HowItWorks";
 import { Reveal } from "@/components/Reveal";
 import { manifest } from "@/content/manifest";
@@ -10,6 +11,7 @@ import { manifest } from "@/content/manifest";
 const NAV = [
   ["#nasil-calisir", "Nasıl çalışır"],
   ["#sehir", "Şehir"],
+  ["#seri", "Seri"],
   ["#ozellikler", "Özellikler"],
   ["#klanlar", "Klanlar"],
   ["#yol-haritasi", "Yol haritası"],
@@ -23,6 +25,7 @@ export default function Home() {
         <Hero />
         <How />
         <City />
+        <Progress />
         <Features />
         <Clans />
         <Roadmap />
@@ -200,6 +203,19 @@ function Footer() {
         <p>Reklam yok · Veri satışı yok · KVKK uyumlu tasarım</p>
       </div>
     </footer>
+  );
+}
+
+function Progress() {
+  return (
+    <section id="seri" className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
+      <SectionTitle
+        eyebrow="Seri ve sözleşme"
+        title="Kendine verdiğin sözü tut"
+        subtitle="Enerjini ortaya koy, görevleri bitir, serini kalkanla koru. Dene: yatırımı değiştir."
+      />
+      <ProgressDemo />
+    </section>
   );
 }
 

@@ -1,5 +1,5 @@
 import {
-  Ban, Building2, Flame, Lock, Radar, ShieldCheck, Sparkles, Timer, Users,
+  Ban, Building2, ChartColumn, Handshake, Flame, Lock, Radar, ShieldCheck, Sparkles, Timer, Users,
   type LucideIcon,
 } from "lucide-react";
 import type { Feature, FeatureStatus } from "@/content/manifest";
@@ -8,6 +8,8 @@ const ICONS: Record<string, LucideIcon> = {
   focus_session: Timer,
   anti_doomscroll: Ban,
   city: Building2,
+  focus_contract: Handshake,
+  focus_map: ChartColumn,
   clans: Users,
   fair_rewards: ShieldCheck,
   quests: Flame,

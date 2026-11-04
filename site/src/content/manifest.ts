@@ -35,10 +35,21 @@ export type Building = {
 /** levelXp[i] = total XP to reach level i + 1. */
 export type CityRules = { levelXp: number[]; buildings: Building[] };
 
+export type ProgressRules = {
+  tags: string[];
+  /** won = Enerji returned when the session is finished. */
+  stakes: { stake: number; won: number }[];
+  freezeCost: number;
+  maxFreezes: number;
+  quests: { title: string; reward: number }[];
+  questsPerDay: number;
+};
+
 export const manifest = data as {
   appVersion: string;
   focusRules: FocusRules;
   city: CityRules;
+  progress: ProgressRules;
   features: Feature[];
   roadmap: RoadmapStep[];
 };

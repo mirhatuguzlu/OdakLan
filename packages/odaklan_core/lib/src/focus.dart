@@ -2,6 +2,8 @@
 /// app, the website and (later) the server agree on the same numbers.
 library;
 
+import 'progress.dart';
+
 /// Every full block of focused time earns 1 Enerji.
 const energyBlockMinutes = 10;
 
@@ -55,9 +57,16 @@ class FocusSession {
     this.phase = FocusPhase.running,
     this.backgroundedAt,
     this.endedAt,
+    this.stake = 0,
+    this.tag,
   });
 
-  factory FocusSession.start(DateTime now, Duration planned) {
+  factory FocusSession.start(
+    DateTime now,
+    Duration planned, {
+    int stake = 0,
+    String? tag,
+  }) {
     if (planned < const Duration(minutes: 1)) {
       throw ArgumentError.value(
         planned,
@@ -65,7 +74,15 @@ class FocusSession {
         'must be at least 1 minute',
       );
     }
-    return FocusSession(startedAt: now, planned: planned);
+    if (!stakeOptions.contains(stake)) {
+      throw ArgumentError.value(stake, 'stake', 'not an offered stake');
+    }
+    return FocusSession(
+      startedAt: now,
+      planned: planned,
+      stake: stake,
+      tag: isFocusTag(tag) ? tag : null,
+    );
   }
 
   final DateTime startedAt;
@@ -77,6 +94,16 @@ class FocusSession {
 
   /// When focus stopped counting (finish, break or give-up).
   final DateTime? endedAt;
+
+  /// Enerji bet on finishing (focus contract); already taken from the wallet.
+  final int stake;
+
+  /// Intention id from [focusTags], or null.
+  final String? tag;
+
+  /// Enerji returned by the contract once ended.
+  int get stakeReturn =>
+      stakePayout(stake, completed: phase == FocusPhase.completed);
 
   DateTime get plannedEnd => startedAt.add(planned);
   bool get isRunning => phase == FocusPhase.running;
@@ -103,6 +130,8 @@ class FocusSession {
     planned: planned,
     phase: phase,
     endedAt: at,
+    stake: stake,
+    tag: tag,
   );
 
   /// Call on every tick while in the foreground.
@@ -119,6 +148,8 @@ class FocusSession {
       startedAt: startedAt,
       planned: planned,
       backgroundedAt: now,
+      stake: stake,
+      tag: tag,
     );
   }
 
@@ -154,7 +185,12 @@ class FocusSession {
           ? _end(FocusPhase.broken, awaySince)
           : _end(FocusPhase.completed, plannedEnd);
     }
-    final back = FocusSession(startedAt: startedAt, planned: planned);
+    final back = FocusSession(
+      startedAt: startedAt,
+      planned: planned,
+      stake: stake,
+      tag: tag,
+    );
     return back.tick(now);
   }
 
@@ -167,6 +203,8 @@ class FocusSession {
     'phase': phase.name,
     'backgroundedAt': backgroundedAt?.toUtc().toIso8601String(),
     'endedAt': endedAt?.toUtc().toIso8601String(),
+    'stake': stake,
+    'tag': tag,
   };
 
   /// Returns null for anything malformed (persisted data is untrusted).
@@ -177,12 +215,17 @@ class FocusSession {
           v == null ? null : DateTime.parse(v as String);
       final seconds = json['plannedSeconds'] as int;
       if (seconds < 60 || seconds > 24 * 3600) return null;
+      final stake = (json['stake'] as int?) ?? 0;
+      if (!stakeOptions.contains(stake)) return null;
+      final tag = json['tag'] as String?;
       return FocusSession(
         startedAt: date(json['startedAt'])!,
         planned: Duration(seconds: seconds),
         phase: FocusPhase.values.byName(json['phase'] as String),
         backgroundedAt: date(json['backgroundedAt']),
         endedAt: date(json['endedAt']),
+        stake: stake,
+        tag: isFocusTag(tag) ? tag : null,
       );
     } catch (_) {
       return null;

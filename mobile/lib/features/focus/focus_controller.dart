@@ -7,12 +7,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:odaklan_core/odaklan_core.dart';
 
 import '../../app/services.dart';
+import '../progress/progress_controller.dart';
 import 'wallet.dart';
 
 typedef FocusState = ({FocusSession? active, FocusSession? lastEnded});
 
 /// Runs the current focus session: ticks it, watches the app lifecycle,
-/// persists it, and credits the wallet exactly once when it ends.
+/// persists it, and credits the wallet (reward + contract) and the history
+/// exactly once when it ends.
 class FocusController extends Notifier<FocusState> {
   static const _activeKey = 'focus.active';
 
@@ -44,9 +46,7 @@ class FocusController extends Notifier<FocusState> {
         final ended = restored;
         ref.read(prefsProvider).remove(_activeKey);
         // Providers may not modify other providers while building.
-        Future.microtask(
-          () => ref.read(walletProvider.notifier).add(ended.reward),
-        );
+        Future.microtask(() => _credit(ended));
       }
       return (active: null, lastEnded: restored);
     }
@@ -62,12 +62,17 @@ class FocusController extends Notifier<FocusState> {
     }
   }
 
-  void start(Duration planned) {
-    if (state.active != null) return;
-    final session = FocusSession.start(_now(), planned);
+  /// Returns false (nothing starts) when the stake can't be paid.
+  bool start(Duration planned, {int stake = 0, String? tag}) {
+    if (state.active != null) return false;
+    final session = FocusSession.start(_now(), planned, stake: stake, tag: tag);
+    if (stake > 0 && !ref.read(walletProvider.notifier).spend(stake)) {
+      return false;
+    }
     HapticFeedback.mediumImpact();
     _set(session);
     _startTimer();
+    return true;
   }
 
   void giveUp() => _update(state.active?.giveUp(_now()));
@@ -115,11 +120,19 @@ class FocusController extends Notifier<FocusState> {
   void _finish(FocusSession ended) {
     _timer?.cancel();
     ref.read(prefsProvider).remove(_activeKey);
-    ref.read(walletProvider.notifier).add(ended.reward);
+    _credit(ended);
     ended.phase == FocusPhase.completed
         ? HapticFeedback.heavyImpact()
         : HapticFeedback.vibrate();
     state = (active: null, lastEnded: ended);
+  }
+
+  void _credit(FocusSession ended) {
+    final r = ended.reward;
+    ref
+        .read(walletProvider.notifier)
+        .add(FocusReward(energy: r.energy + ended.stakeReturn, xp: r.xp));
+    ref.read(progressProvider.notifier).record(ended);
   }
 }
 

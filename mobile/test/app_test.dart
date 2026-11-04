@@ -50,7 +50,12 @@ void main() {
 
     await tester.tap(find.text('Klan'));
     await tester.pump(const Duration(milliseconds: 500));
-    expect(find.text('Klan kalesi — adım 6'), findsOneWidget);
+    expect(find.text('Klan kalesi — adım 7'), findsOneWidget);
+
+    await tester.tap(find.text('Profil'));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('0 günlük seri'), findsOneWidget);
+    expect(find.text('Bugünün görevleri'), findsOneWidget);
 
     await tester.tap(find.text('Şehir'));
     await tester.pump(const Duration(milliseconds: 500));

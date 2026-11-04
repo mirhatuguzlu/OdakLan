@@ -6,8 +6,10 @@ import 'package:odaklan_core/odaklan_core.dart';
 
 import '../../app/services.dart';
 import '../../app/theme.dart';
+import '../progress/streak_chip.dart';
 import 'focus_controller.dart';
 import 'focus_ring.dart';
+import 'wallet.dart';
 import 'wallet_chips.dart';
 
 class FocusScreen extends ConsumerWidget {
@@ -21,7 +23,9 @@ class FocusScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Odak'),
+        title: const Row(
+          children: [Text('Odak'), SizedBox(width: 10), StreakChip()],
+        ),
         centerTitle: false,
         actions: const [WalletChips(), SizedBox(width: 12)],
       ),
@@ -53,11 +57,30 @@ class _Idle extends ConsumerStatefulWidget {
 
 class _IdleState extends ConsumerState<_Idle> {
   int _minutes = 25;
+  int _stake = 0;
+  String? _tag;
+
+  void _start() {
+    final ok = ref
+        .read(focusProvider.notifier)
+        .start(
+          Duration(minutes: _minutes),
+          stake: _stake,
+          tag: _tag,
+        );
+    if (!ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sözleşme için yeterli Enerjin yok.')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final planned = Duration(minutes: _minutes);
     final best = rewardFor(planned, completed: true);
+    final energy = ref.watch(walletProvider).energy;
+    final won = stakePayout(_stake, completed: true);
     return Column(
       children: [
         const SizedBox(height: 8),
@@ -75,6 +98,56 @@ class _IdleState extends ConsumerState<_Idle> {
           selected: {_minutes},
           onSelectionChanged: (s) => setState(() => _minutes = s.first),
         ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          alignment: WrapAlignment.center,
+          children: [
+            for (final t in focusTags)
+              ChoiceChip(
+                label: Text(t.label),
+                selected: _tag == t.id,
+                showCheckmark: false,
+                visualDensity: VisualDensity.compact,
+                onSelected: (on) => setState(() => _tag = on ? t.id : null),
+              ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            const Tooltip(
+              message:
+                  'Enerji yatır: bitirirsen %50 fazlasıyla geri al, kaçarsan kaybet.',
+              child: Row(
+                children: [
+                  Icon(Icons.bolt, size: 16, color: AppColors.accent),
+                  Text(
+                    'Sözleşme',
+                    style: TextStyle(color: AppColors.textMuted),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: SegmentedButton<int>(
+                showSelectedIcon: false,
+                segments: [
+                  for (final s in stakeOptions)
+                    ButtonSegment(
+                      value: s,
+                      enabled: s <= energy,
+                      label: Text(s == 0 ? 'Yok' : '$s'),
+                    ),
+                ],
+                selected: {_stake <= energy ? _stake : 0},
+                onSelectionChanged: (s) => setState(() => _stake = s.first),
+              ),
+            ),
+          ],
+        ),
         Expanded(
           child: Center(
             child: FocusRing(
@@ -85,14 +158,17 @@ class _IdleState extends ConsumerState<_Idle> {
           ),
         ),
         Text(
-          'Bitirirsen +${best.energy} Enerji · +${best.xp} XP',
+          _stake == 0
+              ? 'Bitirirsen +${best.energy} Enerji · +${best.xp} XP'
+              : 'Bitirirsen +${best.energy + won} Enerji (sözleşme $won) · +${best.xp} XP',
+          textAlign: TextAlign.center,
           style: const TextStyle(color: AppColors.textMuted),
         ),
         const SizedBox(height: 16),
         SizedBox(
           width: double.infinity,
           child: FilledButton(
-            onPressed: () => ref.read(focusProvider.notifier).start(planned),
+            onPressed: _start,
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 18),
               textStyle: const TextStyle(
@@ -234,9 +310,14 @@ class _RunningState extends ConsumerState<_Running>
         const SizedBox(height: 8),
         Text('Odaktasın', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 4),
-        const Text(
-          'Telefonu bırak. Kilitlemek serbest.',
-          style: TextStyle(color: AppColors.textMuted),
+        Text(
+          [
+            if (s.tag != null) tagLabel(s.tag),
+            if (s.stake > 0) 'Sözleşme: ${s.stake} Enerji masada',
+            if (s.tag == null && s.stake == 0)
+              'Telefonu bırak. Kilitlemek serbest.',
+          ].join(' · '),
+          style: const TextStyle(color: AppColors.textMuted),
         ),
         Expanded(
           child: Center(
@@ -277,6 +358,7 @@ class _Result extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final r = session.reward;
+    final contract = session.stakeReturn;
     final focusedMin = session.focusedAt(session.endedAt!).inMinutes;
     final (icon, color, title, body) = switch (session.phase) {
       FocusPhase.completed => (
@@ -332,6 +414,18 @@ class _Result extends ConsumerWidget {
             ),
           ],
         ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.3),
+        if (session.stake > 0) ...[
+          const SizedBox(height: 14),
+          Text(
+            contract > 0
+                ? 'Sözleşmeyi kazandın: +$contract Enerji'
+                : 'Sözleşmeyi kaybettin: -${session.stake} Enerji',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: contract > 0 ? AppColors.success : AppColors.danger,
+            ),
+          ).animate().fadeIn(delay: 350.ms),
+        ],
         const Spacer(),
         SizedBox(
           width: double.infinity,
