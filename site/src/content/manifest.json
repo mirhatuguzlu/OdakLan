@@ -1,5 +1,5 @@
 {
-  "appVersion": "0.2.0",
+  "appVersion": "0.3.0",
   "focusRules": {
     "energyBlockMinutes": 10,
     "leaveGraceSeconds": 10,
@@ -50,6 +50,87 @@
       }
     ]
   },
+  "city": {
+    "levelXp": [
+      0,
+      50,
+      150,
+      300,
+      500,
+      750,
+      1050,
+      1400,
+      1800,
+      2250
+    ],
+    "buildings": [
+      {
+        "id": "home",
+        "name": "Ev",
+        "description": "Şehrinin ilk ışığı.",
+        "unlockLevel": 1,
+        "costs": [
+          2,
+          4,
+          6,
+          8,
+          10
+        ]
+      },
+      {
+        "id": "library",
+        "name": "Kütüphane",
+        "description": "Sessiz saatlerin anıtı.",
+        "unlockLevel": 2,
+        "costs": [
+          3,
+          6,
+          9,
+          12,
+          15
+        ]
+      },
+      {
+        "id": "park",
+        "name": "Park",
+        "description": "Ekransız bir nefes.",
+        "unlockLevel": 3,
+        "costs": [
+          3,
+          6,
+          9,
+          12,
+          15
+        ]
+      },
+      {
+        "id": "workshop",
+        "name": "Atölye",
+        "description": "Odaklanan eller burada üretir.",
+        "unlockLevel": 4,
+        "costs": [
+          5,
+          10,
+          15,
+          20,
+          25
+        ]
+      },
+      {
+        "id": "tower",
+        "name": "Odak Kulesi",
+        "description": "Şehrin her yerinden görünür.",
+        "unlockLevel": 6,
+        "costs": [
+          8,
+          16,
+          24,
+          32,
+          40
+        ]
+      }
+    ]
+  },
   "features": [
     {
       "id": "focus_session",
@@ -66,8 +147,8 @@
     {
       "id": "city",
       "title": "Siber Şehrin",
-      "description": "Kazandığın Enerji ile neon şehrini kur, binalarını seviye atlat.",
-      "status": "planned"
+      "description": "Kazandığın Enerji ile şehrini kur, binalarını seviye atlat. XP topladıkça yeni binaların kilidi açılır.",
+      "status": "ready"
     },
     {
       "id": "clans",
@@ -115,7 +196,7 @@
     {
       "number": 3,
       "title": "Siber şehir ve seviyeler",
-      "done": false
+      "done": true
     },
     {
       "number": 4,

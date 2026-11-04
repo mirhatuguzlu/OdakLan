@@ -6,6 +6,7 @@ library;
 
 import 'dart:convert';
 
+import 'city.dart';
 import 'focus.dart';
 
 /// live = in the stores; ready = built in the app, not released yet.
@@ -20,6 +21,18 @@ String manifestJson() =>
         'leaveGraceSeconds': leaveGrace.inSeconds,
         'presets': [
           for (final m in sessionPresetsMinutes) {'minutes': m, 'completed': _reward(rewardFor(Duration(minutes: m), completed: true)), 'brokenAtHalf': _reward(rewardFor(Duration(minutes: m ~/ 2), completed: false))},
+        ],
+      },
+      'city': {
+        'levelXp': [for (var l = 1; l <= 10; l++) xpForLevel(l)],
+        'buildings': [
+          for (final b in buildings) {
+              'id': b.id,
+              'name': b.name,
+              'description': b.description,
+              'unlockLevel': b.unlockLevel,
+              'costs': [for (var l = 1; l <= b.maxLevel; l++) b.costToReach(l)],
+            },
         ],
       },
       'features': [
@@ -59,7 +72,7 @@ class RoadmapStep {
   final bool done;
 }
 
-const appVersion = '0.2.0';
+const appVersion = '0.3.0';
 
 const features = <Feature>[
   Feature(
@@ -82,8 +95,9 @@ const features = <Feature>[
     id: 'city',
     title: 'Siber Şehrin',
     description:
-        'Kazandığın Enerji ile neon şehrini kur, binalarını seviye atlat.',
-    status: FeatureStatus.planned,
+        'Kazandığın Enerji ile şehrini kur, binalarını seviye atlat. '
+        'XP topladıkça yeni binaların kilidi açılır.',
+    status: FeatureStatus.ready,
   ),
   Feature(
     id: 'clans',
@@ -125,7 +139,7 @@ const features = <Feature>[
 const roadmap = <RoadmapStep>[
   RoadmapStep(1, 'Uygulama ve site iskeleti', done: true),
   RoadmapStep(2, 'Odak motoru ve zamanlayıcı', done: true),
-  RoadmapStep(3, 'Siber şehir ve seviyeler'),
+  RoadmapStep(3, 'Siber şehir ve seviyeler', done: true),
   RoadmapStep(4, 'Hesaplar ve güvenli veritabanı'),
   RoadmapStep(5, 'Sunucu doğrulamalı seanslar'),
   RoadmapStep(6, 'Odak Klanları ve ortak kale'),

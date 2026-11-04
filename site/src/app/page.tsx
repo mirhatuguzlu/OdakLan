@@ -1,4 +1,5 @@
 import { Check, Menu, TrendingDown, UserPlus, Wrench, Trophy, Zap } from "lucide-react";
+import { CityDemo } from "@/components/CityDemo";
 import { ClanDemo } from "@/components/ClanDemo";
 import { FeatureCard } from "@/components/FeatureCard";
 import { Hero } from "@/components/Hero";
@@ -8,6 +9,7 @@ import { manifest } from "@/content/manifest";
 
 const NAV = [
   ["#nasil-calisir", "Nasıl çalışır"],
+  ["#sehir", "Şehir"],
   ["#ozellikler", "Özellikler"],
   ["#klanlar", "Klanlar"],
   ["#yol-haritasi", "Yol haritası"],
@@ -20,6 +22,7 @@ export default function Home() {
       <main>
         <Hero />
         <How />
+        <City />
         <Features />
         <Clans />
         <Roadmap />
@@ -197,5 +200,18 @@ function Footer() {
         <p>Reklam yok · Veri satışı yok · KVKK uyumlu tasarım</p>
       </div>
     </footer>
+  );
+}
+
+function City() {
+  return (
+    <section id="sehir" className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
+      <SectionTitle
+        eyebrow="Siber şehir"
+        title="Odaklandıkça şehrin büyür"
+        subtitle="Enerjini binalara harca, XP topla, yeni binaların kilidini aç. Dene: binaları yükselt."
+      />
+      <CityDemo />
+    </section>
   );
 }

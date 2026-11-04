@@ -23,9 +23,22 @@ export type FocusRules = {
   presets: { minutes: number; completed: Reward; brokenAtHalf: Reward }[];
 };
 
+export type Building = {
+  id: string;
+  name: string;
+  description: string;
+  unlockLevel: number;
+  /** costs[i] = Enerji to reach level i + 1. */
+  costs: number[];
+};
+
+/** levelXp[i] = total XP to reach level i + 1. */
+export type CityRules = { levelXp: number[]; buildings: Building[] };
+
 export const manifest = data as {
   appVersion: string;
   focusRules: FocusRules;
+  city: CityRules;
   features: Feature[];
   roadmap: RoadmapStep[];
 };

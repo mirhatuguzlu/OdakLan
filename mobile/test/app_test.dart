@@ -52,6 +52,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('Klan kalesi — adım 6'), findsOneWidget);
 
+    await tester.tap(find.text('Şehir'));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('Seviye 1'), findsOneWidget);
+
     // Unmount so flutter_animate's start timers don't outlive the test.
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(seconds: 1));

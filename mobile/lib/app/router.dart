@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/city/city_screen.dart';
 import '../features/focus/focus_screen.dart';
 import '../features/shell/home_shell.dart';
 import '../features/shell/placeholder_screen.dart';
@@ -14,14 +15,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state, shell) => HomeShell(shell: shell),
         branches: [
           _branch('/focus', const FocusScreen()),
-          _branch(
-            '/city',
-            const PlaceholderScreen(
-              title: 'Şehir',
-              hint: 'Şehrini inşa et — adım 3',
-              icon: Icons.location_city_outlined,
-            ),
-          ),
+          _branch('/city', const CityScreen()),
           _branch(
             '/clan',
             const PlaceholderScreen(

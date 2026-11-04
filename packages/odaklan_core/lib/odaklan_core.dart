@@ -2,5 +2,6 @@
 /// so the website always describes what the app actually does.
 library;
 
+export 'src/city.dart';
 export 'src/features.dart';
 export 'src/focus.dart';

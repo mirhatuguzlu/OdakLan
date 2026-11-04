@@ -20,8 +20,18 @@ class WalletNotifier extends Notifier<Wallet> {
     );
   }
 
-  void add(FocusReward reward) {
-    state = (energy: state.energy + reward.energy, xp: state.xp + reward.xp);
+  void add(FocusReward reward) =>
+      _save((energy: state.energy + reward.energy, xp: state.xp + reward.xp));
+
+  /// Returns false (and spends nothing) when the balance is too low.
+  bool spend(int energy) {
+    if (energy < 0 || energy > state.energy) return false;
+    _save((energy: state.energy - energy, xp: state.xp));
+    return true;
+  }
+
+  void _save(Wallet next) {
+    state = next;
     final prefs = ref.read(prefsProvider);
     prefs.setInt(_energyKey, state.energy);
     prefs.setInt(_xpKey, state.xp);

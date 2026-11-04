@@ -8,7 +8,7 @@ import '../../app/services.dart';
 import '../../app/theme.dart';
 import 'focus_controller.dart';
 import 'focus_ring.dart';
-import 'wallet.dart';
+import 'wallet_chips.dart';
 
 class FocusScreen extends ConsumerWidget {
   const FocusScreen({super.key});
@@ -23,7 +23,7 @@ class FocusScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Odak'),
         centerTitle: false,
-        actions: const [_WalletChips(), SizedBox(width: 12)],
+        actions: const [WalletChips(), SizedBox(width: 12)],
       ),
       body: SafeArea(
         child: Padding(
@@ -37,53 +37,6 @@ class FocusScreen extends ConsumerWidget {
                 : const _Idle(key: ValueKey('idle')),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _WalletChips extends ConsumerWidget {
-  const _WalletChips();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final w = ref.watch(walletProvider);
-    return Row(
-      children: [
-        _Chip(icon: Icons.bolt, text: '${w.energy}', color: AppColors.accent),
-        const SizedBox(width: 8),
-        _Chip(
-          icon: Icons.star_rounded,
-          text: '${w.xp} XP',
-          color: AppColors.textMuted,
-        ),
-      ],
-    );
-  }
-}
-
-class _Chip extends StatelessWidget {
-  const _Chip({required this.icon, required this.text, required this.color});
-
-  final IconData icon;
-  final String text;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(99),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: 4),
-          Text(text, style: const TextStyle(fontWeight: FontWeight.w600)),
-        ],
       ),
     );
   }
@@ -366,13 +319,13 @@ class _Result extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _Chip(
+            StatChip(
               icon: Icons.bolt,
               text: '+${r.energy} Enerji',
               color: AppColors.accent,
             ),
             const SizedBox(width: 10),
-            _Chip(
+            StatChip(
               icon: Icons.star_rounded,
               text: '+${r.xp} XP',
               color: AppColors.textMuted,
