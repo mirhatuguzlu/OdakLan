@@ -79,6 +79,7 @@ class FocusController extends Notifier<FocusState> {
       return false;
     }
     HapticFeedback.mediumImpact();
+    ref.read(leaveAlertProvider).requestPermission();
     _set(session);
     _startTimer();
     return true;
@@ -90,10 +91,19 @@ class FocusController extends Notifier<FocusState> {
       state = (active: state.active, lastEnded: null, credited: null);
 
   @visibleForTesting
-  void onHidden() => _update(state.active?.backgrounded(_now()));
+  void onHidden() {
+    final active = state.active;
+    if (active == null) return;
+    _update(active.backgrounded(_now()));
+    // Ending inside the grace counts as completed, so nothing to warn about.
+    if (active.plannedEnd.difference(_now()) > leaveGrace) {
+      ref.read(leaveAlertProvider).started(leaveGrace);
+    }
+  }
 
   @visibleForTesting
   Future<void> onShown() async {
+    ref.read(leaveAlertProvider).ended();
     if (state.active?.backgroundedAt == null) return;
     final lock = await ref.read(screenLockProvider).take();
     _update(

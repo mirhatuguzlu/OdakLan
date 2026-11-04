@@ -38,3 +38,26 @@ class ScreenLockEvents {
 final screenLockProvider = Provider<ScreenLockEvents>(
   (ref) => ScreenLockEvents(),
 );
+
+/// Native "come back" notification: a live countdown while the user is away
+/// that turns into "session broken" when the grace runs out (Android only).
+class LeaveAlert {
+  static const _channel = MethodChannel('odaklan/screen_lock');
+
+  Future<void> _call(String method, [Object? args]) async {
+    try {
+      await _channel.invokeMethod<void>(method, args);
+    } on MissingPluginException {
+      // Tests / iOS: no notification.
+    }
+  }
+
+  Future<void> requestPermission() => _call('requestNotificationPermission');
+
+  Future<void> started(Duration grace) =>
+      _call('leaveStarted', {'graceMs': grace.inMilliseconds});
+
+  Future<void> ended() => _call('leaveEnded');
+}
+
+final leaveAlertProvider = Provider<LeaveAlert>((ref) => LeaveAlert());
