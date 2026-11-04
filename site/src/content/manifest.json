@@ -63,12 +63,21 @@
       1800,
       2250
     ],
+    "decay": {
+      "tendedDayMinutes": 20,
+      "perDay": 25,
+      "breakDamage": 30,
+      "repairPerBlock": 10,
+      "workingCondition": 40,
+      "conditionAfterCollapse": 60
+    },
     "buildings": [
       {
         "id": "home",
         "name": "Ev",
         "description": "Şehrinin ilk ışığı.",
         "unlockLevel": 1,
+        "effect": "Her seviye günlük çürümeyi 3 azaltır.",
         "costs": [
           2,
           4,
@@ -82,6 +91,7 @@
         "name": "Kütüphane",
         "description": "Sessiz saatlerin anıtı.",
         "unlockLevel": 2,
+        "effect": "Her seviye seans XP’sine %10 ekler.",
         "costs": [
           3,
           6,
@@ -95,6 +105,7 @@
         "name": "Park",
         "description": "Ekransız bir nefes.",
         "unlockLevel": 3,
+        "effect": "Her seviye 10 dakikalık blok başına onarımı 3 artırır.",
         "costs": [
           3,
           6,
@@ -108,6 +119,7 @@
         "name": "Atölye",
         "description": "Odaklanan eller burada üretir.",
         "unlockLevel": 4,
+        "effect": "Tamamlanan seanslarda her seviye Enerji’ye %20 ekler.",
         "costs": [
           5,
           10,
@@ -121,6 +133,7 @@
         "name": "Odak Kulesi",
         "description": "Şehrin her yerinden görünür.",
         "unlockLevel": 6,
+        "effect": "Her seviye yarıda bırakma hasarını 4 azaltır, Şehir Gücü’ne %10 ekler.",
         "costs": [
           8,
           16,
@@ -208,7 +221,13 @@
     {
       "id": "city",
       "title": "Siber Şehrin",
-      "description": "Kazandığın Enerji ile şehrini kur, binalarını seviye atlat. XP topladıkça yeni binaların kilidi açılır.",
+      "description": "Kazandığın Enerji ile şehrini kur. Her binanın farklı bir gücü var: XP, Enerji, onarım ya da savunma. Hangi sırayla kuracağın senin stratejin.",
+      "status": "ready"
+    },
+    {
+      "id": "city_decay",
+      "title": "Çürüyen Şehir",
+      "description": "Odaklanmadığın her gün binaların yıpranır, seansı yarıda bırakmak en değerli binanı çatlatır. Sıfıra inen bina bir seviye çöker. Tek onarım yolu: odaklanmak. Harabeler yarı fiyatına yeniden kurulur.",
       "status": "ready"
     },
     {

@@ -60,6 +60,7 @@ export function CityDemo() {
                 <p className="font-display font-semibold">
                   {b.name} <span className="text-sm font-normal text-muted tabular-nums">Sv {l}/{max}</span>
                 </p>
+                <p className="text-sm text-ink/80">{b.effect}</p>
                 <p className="flex items-center gap-1 text-sm text-muted">
                   {b.unlockLevel > 1 && <Lock size={12} aria-hidden />}
                   {b.unlockLevel > 1 ? `Seviye ${b.unlockLevel}’de açılır · ` : ""}
@@ -132,8 +133,8 @@ function Plot({ id, level }: { id: string; level: number }) {
       <motion.path initial={false} animate={{ d: pts(L, B, up(B), up(L)) }} transition={spring} className="fill-raised" />
       <motion.path initial={false} animate={{ d: pts(B, R, up(R), up(B)) }} transition={spring} className="fill-[#24272e]" />
       <motion.path initial={false} animate={{ d: diamond(up(t), w, h) }} transition={spring} className="fill-line" />
-      {windows.map((d, i) => (
-        <motion.path key={`${level}-${i}`} d={d} className="fill-accent/85" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} />
+      {windows.map((d) => (
+        <motion.path key={`${level}-${d}`} d={d} className="fill-accent/85" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} />
       ))}
     </motion.g>
   );

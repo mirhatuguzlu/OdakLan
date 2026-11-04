@@ -73,13 +73,14 @@ class _CityViewState extends State<CityView>
     return Semantics(
       label: built.isEmpty
           ? 'Şehir henüz boş'
-          : 'Şehir: ${built.map((b) => '${b.name} seviye ${widget.city.levelOf(b.id)}').join(', ')}',
+          : 'Şehir: ${built.map((b) => '${b.name} seviye ${widget.city.levelOf(b.id)}, sağlık %${widget.city.conditionOf(b.id)}').join(', ')}',
       child: AspectRatio(
         aspectRatio: 1.1,
         child: AnimatedBuilder(
           animation: _anim,
-          builder: (context, _) =>
-              CustomPaint(painter: _CityPainter(_current, widget.playerLevel)),
+          builder: (context, _) => CustomPaint(
+            painter: _CityPainter(_current, widget.playerLevel, widget.city),
+          ),
         ),
       ),
     );
@@ -87,10 +88,13 @@ class _CityViewState extends State<CityView>
 }
 
 class _CityPainter extends CustomPainter {
-  _CityPainter(this.levels, this.playerLevel);
+  _CityPainter(this.levels, this.playerLevel, this.city);
 
   final Map<String, double> levels;
   final int playerLevel;
+
+  /// For condition (cracks, dim windows) and ruins.
+  final City city;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -129,13 +133,23 @@ class _CityPainter extends CustomPainter {
       // Inset footprint: 15% margin inside the tile.
       final base = top(c + 0.15, r + 0.15);
       final w = tw * 0.7, h = th * 0.7;
+      final health = city.conditionOf(b.id) / maxCondition;
       if (level <= 0.01) {
         _emptyPlot(canvas, base, w, h, locked: playerLevel < b.unlockLevel);
+        if (city.peakOf(b.id) > 0) _rubble(canvas, base, w, h);
       } else if (b.id == 'park') {
-        _park(canvas, base, w, h, level);
+        _park(canvas, base, w, h, level, health);
       } else {
         final tall = b.id == 'tower' ? 1.4 : 1.0;
-        _box(canvas, base, w, h, th * (0.35 + 0.3 * level) * tall, level);
+        _box(
+          canvas,
+          base,
+          w,
+          h,
+          th * (0.35 + 0.3 * level) * tall,
+          level,
+          health,
+        );
       }
     }
   }
@@ -172,6 +186,7 @@ class _CityPainter extends CustomPainter {
     double h,
     double height,
     double level,
+    double health,
   ) {
     final up = Offset(0, -height);
     final left = t + Offset(-w / 2, h / 2);
@@ -197,7 +212,9 @@ class _CityPainter extends CustomPainter {
       ..drawPath(_diamond(t + up, w, h), Paint()..color = AppColors.border);
 
     // Lit windows: one row per full level (lights = Enerji).
-    final lit = Paint()..color = AppColors.accent.withValues(alpha: 0.85);
+    // Lights fade as the building decays.
+    final lit = Paint()
+      ..color = AppColors.accent.withValues(alpha: 0.15 + 0.7 * health);
     final floors = level.floor().clamp(0, 9);
     for (var f = 0; f < floors; f++) {
       final v0 = (f + 0.35) / (floors + 0.5);
@@ -210,14 +227,66 @@ class _CityPainter extends CustomPainter {
         );
       }
     }
+    if (health * maxCondition < workingCondition) {
+      _crack(
+        canvas,
+        Offset.lerp(left, left + up, 0.9)!,
+        Offset.lerp(bottom, left, 0.4)!,
+      );
+      _crack(
+        canvas,
+        Offset.lerp(bottom + up, right + up, 0.5)!,
+        Offset.lerp(bottom, right, 0.6)!,
+      );
+    }
   }
 
-  void _park(Canvas canvas, Offset t, double w, double h, double level) {
+  /// Zig-zag crack on a damaged building's front faces.
+  void _crack(Canvas canvas, Offset from, Offset to) {
+    final path = Path()..moveTo(from.dx, from.dy);
+    for (var i = 1; i <= 4; i++) {
+      final p = Offset.lerp(from, to, i / 4)!;
+      path.lineTo(p.dx + (i.isOdd ? 4 : -4), p.dy);
+    }
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = AppColors.danger
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.6,
+    );
+  }
+
+  /// Broken stones on a collapsed plot (cheap to rebuild).
+  void _rubble(Canvas canvas, Offset t, double w, double h) {
+    final stone = Paint()..color = AppColors.border;
+    for (final (dx, dy, r) in [
+      (-0.18, 0.5, 5.0),
+      (0.1, 0.42, 4.0),
+      (0.05, 0.62, 6.0),
+    ]) {
+      canvas.drawCircle(t + Offset(dx * w, dy * h), r, stone);
+    }
+  }
+
+  void _park(
+    Canvas canvas,
+    Offset t,
+    double w,
+    double h,
+    double level,
+    double health,
+  ) {
     canvas.drawPath(
       _diamond(t, w, h),
       Paint()..color = AppColors.success.withValues(alpha: 0.18),
     );
-    final tree = Paint()..color = AppColors.success.withValues(alpha: 0.75);
+    final tree = Paint()
+      ..color = Color.lerp(
+        const Color(0xFF6B5B3E), // withered
+        AppColors.success,
+        health,
+      )!.withValues(alpha: 0.8);
     final trees = level.ceil().clamp(1, 5);
     for (var i = 0; i < trees; i++) {
       // Spread trees on a small ring inside the plot.
@@ -231,7 +300,9 @@ class _CityPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_CityPainter old) =>
-      old.playerLevel != playerLevel || !_sameLevels(old.levels, levels);
+      old.playerLevel != playerLevel ||
+      !identical(old.city, city) ||
+      !_sameLevels(old.levels, levels);
 
   static bool _sameLevels(Map<String, double> a, Map<String, double> b) =>
       a.length == b.length && a.keys.every((k) => a[k] == b[k]);

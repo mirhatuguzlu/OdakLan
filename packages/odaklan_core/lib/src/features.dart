@@ -26,12 +26,14 @@ String manifestJson() =>
       },
       'city': {
         'levelXp': [for (var l = 1; l <= 10; l++) xpForLevel(l)],
+        'decay': {'tendedDayMinutes': tendedDayMinutes, 'perDay': const City().decayPerDay, 'breakDamage': const City().breakDamage, 'repairPerBlock': const City().repairPerBlock, 'workingCondition': workingCondition, 'conditionAfterCollapse': conditionAfterCollapse},
         'buildings': [
           for (final b in buildings) {
               'id': b.id,
               'name': b.name,
               'description': b.description,
               'unlockLevel': b.unlockLevel,
+              'effect': b.effect,
               'costs': [for (var l = 1; l <= b.maxLevel; l++) b.costToReach(l)],
             },
         ],
@@ -108,8 +110,16 @@ const features = <Feature>[
     id: 'city',
     title: 'Siber Şehrin',
     description:
-        'Kazandığın Enerji ile şehrini kur, binalarını seviye atlat. '
-        'XP topladıkça yeni binaların kilidi açılır.',
+        'Kazandığın Enerji ile şehrini kur. Her binanın farklı bir gücü var: '
+        'XP, Enerji, onarım ya da savunma. Hangi sırayla kuracağın senin stratejin.',
+    status: FeatureStatus.ready,
+  ),
+  Feature(
+    id: 'city_decay',
+    title: 'Çürüyen Şehir',
+    description:
+        'Odaklanmadığın her gün binaların yıpranır, seansı yarıda bırakmak en değerli binanı çatlatır. '
+        'Sıfıra inen bina bir seviye çöker. Tek onarım yolu: odaklanmak. Harabeler yarı fiyatına yeniden kurulur.',
     status: FeatureStatus.ready,
   ),
   Feature(

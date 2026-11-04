@@ -7,6 +7,7 @@ import 'package:odaklan_core/odaklan_core.dart';
 import '../../app/services.dart';
 import '../../app/theme.dart';
 import '../progress/streak_chip.dart';
+import '../city/city_controller.dart';
 import 'focus_controller.dart';
 import 'focus_ring.dart';
 import 'wallet.dart';
@@ -78,7 +79,11 @@ class _IdleState extends ConsumerState<_Idle> {
   @override
   Widget build(BuildContext context) {
     final planned = Duration(minutes: _minutes);
-    final best = rewardFor(planned, completed: true);
+    final city = ref.watch(cityProvider);
+    final best = city.boosted(
+      rewardFor(planned, completed: true),
+      completed: true,
+    );
     final energy = ref.watch(walletProvider).energy;
     final won = stakePayout(_stake, completed: true);
     return Column(
@@ -186,7 +191,8 @@ class _IdleState extends ConsumerState<_Idle> {
         ),
         _Rule(
           Icons.logout,
-          'Başka uygulamaya geçersen ${leaveGrace.inSeconds} sn sonra seans bozulur.',
+          'Başka uygulamaya geçersen ${leaveGrace.inSeconds} sn sonra seans bozulur'
+          '${city.levels.isEmpty ? '' : ', en değerli binan −${city.breakDamage} hasar alır'}.',
         ),
         const _Rule(
           Icons.bolt,
@@ -357,7 +363,8 @@ class _Result extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final r = session.reward;
+    final r = ref.watch(focusProvider).credited ?? session.reward;
+    final news = ref.watch(cityNewsProvider);
     final contract = session.stakeReturn;
     final focusedMin = session.focusedAt(session.endedAt!).inMinutes;
     final (icon, color, title, body) = switch (session.phase) {
@@ -426,11 +433,25 @@ class _Result extends ConsumerWidget {
             ),
           ).animate().fadeIn(delay: 350.ms),
         ],
+        for (final (i, e) in news.indexed)
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Text(
+              describeCityEvent(e),
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: e is Repaired ? AppColors.success : AppColors.danger,
+              ),
+            ).animate().fadeIn(delay: (450 + 120 * i).ms),
+          ),
         const Spacer(),
         SizedBox(
           width: double.infinity,
           child: FilledButton(
-            onPressed: () => ref.read(focusProvider.notifier).dismissResult(),
+            onPressed: () {
+              ref.read(cityNewsProvider.notifier).clear();
+              ref.read(focusProvider.notifier).dismissResult();
+            },
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 18),
             ),

@@ -7,10 +7,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:odaklan_core/odaklan_core.dart';
 
 import '../../app/services.dart';
+import '../city/city_controller.dart';
 import '../progress/progress_controller.dart';
 import 'wallet.dart';
 
-typedef FocusState = ({FocusSession? active, FocusSession? lastEnded});
+/// [credited] = what the last ended session paid, city bonuses included.
+typedef FocusState = ({
+  FocusSession? active,
+  FocusSession? lastEnded,
+  FocusReward? credited,
+});
 
 /// Runs the current focus session: ticks it, watches the app lifecycle,
 /// persists it, and credits the wallet (reward + contract) and the history
@@ -46,12 +52,15 @@ class FocusController extends Notifier<FocusState> {
         final ended = restored;
         ref.read(prefsProvider).remove(_activeKey);
         // Providers may not modify other providers while building.
-        Future.microtask(() => _credit(ended));
+        Future.microtask(() {
+          final paid = _credit(ended);
+          state = (active: null, lastEnded: ended, credited: paid);
+        });
       }
-      return (active: null, lastEnded: restored);
+      return (active: null, lastEnded: restored, credited: null);
     }
     _startTimer();
-    return (active: restored, lastEnded: null);
+    return (active: restored, lastEnded: null, credited: null);
   }
 
   static Object? _decode(String raw) {
@@ -77,7 +86,8 @@ class FocusController extends Notifier<FocusState> {
 
   void giveUp() => _update(state.active?.giveUp(_now()));
 
-  void dismissResult() => state = (active: state.active, lastEnded: null);
+  void dismissResult() =>
+      state = (active: state.active, lastEnded: null, credited: null);
 
   @visibleForTesting
   void onHidden() => _update(state.active?.backgrounded(_now()));
@@ -113,26 +123,37 @@ class FocusController extends Notifier<FocusState> {
   }
 
   void _set(FocusSession session) {
-    state = (active: session, lastEnded: state.lastEnded);
+    state = (
+      active: session,
+      lastEnded: state.lastEnded,
+      credited: state.credited,
+    );
     ref.read(prefsProvider).setString(_activeKey, jsonEncode(session.toJson()));
   }
 
   void _finish(FocusSession ended) {
     _timer?.cancel();
     ref.read(prefsProvider).remove(_activeKey);
-    _credit(ended);
+    final paid = _credit(ended);
     ended.phase == FocusPhase.completed
         ? HapticFeedback.heavyImpact()
         : HapticFeedback.vibrate();
-    state = (active: null, lastEnded: ended);
+    state = (active: null, lastEnded: ended, credited: paid);
   }
 
-  void _credit(FocusSession ended) {
-    final r = ended.reward;
+  /// Pays the reward boosted by the city as it was during the session,
+  /// then lets the city take the repair or damage.
+  FocusReward _credit(FocusSession ended) {
+    final completed = ended.phase == FocusPhase.completed;
+    final paid = ref
+        .read(cityProvider)
+        .boosted(ended.reward, completed: completed);
     ref
         .read(walletProvider.notifier)
-        .add(FocusReward(energy: r.energy + ended.stakeReturn, xp: r.xp));
+        .add(FocusReward(energy: paid.energy + ended.stakeReturn, xp: paid.xp));
     ref.read(progressProvider.notifier).record(ended);
+    ref.read(cityProvider.notifier).afterSession(ended);
+    return paid;
   }
 }
 

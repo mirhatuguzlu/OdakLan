@@ -28,12 +28,23 @@ export type Building = {
   name: string;
   description: string;
   unlockLevel: number;
+  /** What each level does (strategy). */
+  effect: string;
   /** costs[i] = Enerji to reach level i + 1. */
   costs: number[];
 };
 
 /** levelXp[i] = total XP to reach level i + 1. */
-export type CityRules = { levelXp: number[]; buildings: Building[] };
+export type DecayRules = {
+  tendedDayMinutes: number;
+  perDay: number;
+  breakDamage: number;
+  repairPerBlock: number;
+  workingCondition: number;
+  conditionAfterCollapse: number;
+};
+
+export type CityRules = { levelXp: number[]; decay: DecayRules; buildings: Building[] };
 
 export type ProgressRules = {
   tags: string[];

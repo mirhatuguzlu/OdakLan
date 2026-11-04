@@ -35,11 +35,14 @@ export default function Home() {
   );
 }
 
+// Static export: the year is fixed at build time, which is what we want.
+const BUILD_YEAR = new Date().getFullYear();
+
 function Nav() {
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-bg/80 backdrop-blur-md">
       <nav className="mx-auto flex h-16 max-w-6xl items-center px-4 sm:px-6" aria-label="Ana menü">
-        <a href="#" className="flex items-center gap-1.5 font-display text-xl font-bold">
+        <a href="#top" className="flex items-center gap-1.5 font-display text-xl font-bold">
           <Zap className="text-accent" size={20} fill="currentColor" aria-hidden />
           OdakLan
         </a>
@@ -199,7 +202,7 @@ function Footer() {
   return (
     <footer className="border-t border-line bg-bg">
       <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-4 px-4 py-10 text-muted sm:px-6">
-        <p>© {new Date().getFullYear()} OdakLan</p>
+        <p>© {BUILD_YEAR} OdakLan</p>
         <p>Reklam yok · Veri satışı yok · KVKK uyumlu tasarım</p>
       </div>
     </footer>
@@ -219,15 +222,43 @@ function Progress() {
   );
 }
 
+/** Loss rules, numbers straight from the app's Dart rules. */
+function DecayRulesList() {
+  const d = manifest.city.decay;
+  const rules = [
+    [`Günde ${d.tendedDayMinutes} dk odaklanmazsan`, `her bina gece −${d.perDay} sağlık kaybeder.`],
+    ["Seansı yarıda bırakırsan", `en değerli binan −${d.breakDamage} hasar alır.`],
+    [`Sağlık %${d.workingCondition} altına inerse`, "bina hasarlı sayılır, gücü kapanır."],
+    [
+      "Sağlık sıfırlanırsa",
+      `bina bir seviye çöker (%${d.conditionAfterCollapse} sağlıkla kalır); harabe yarı fiyatına yeniden kurulur.`,
+    ],
+    ["Tek onarım yolu odaklanmak:", `her 10 dakikalık blok en zayıf binayı +${d.repairPerBlock} onarır.`],
+  ];
+  return (
+    <div className="mt-10 rounded-2xl border border-line bg-surface p-6">
+      <h3 className="font-display text-lg font-semibold">Şehrini kaybedebilirsin</h3>
+      <ul className="mt-4 space-y-2 text-muted">
+        {rules.map(([when, then]) => (
+          <li key={when}>
+            <span className="text-ink">{when}</span> {then}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function City() {
   return (
     <section id="sehir" className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
       <SectionTitle
         eyebrow="Siber şehir"
         title="Odaklandıkça şehrin büyür"
-        subtitle="Enerjini binalara harca, XP topla, yeni binaların kilidini aç. Dene: binaları yükselt."
+        subtitle="Her binanın farklı bir gücü var: hangi sırayla kuracağın senin stratejin. Dene: binaları yükselt."
       />
       <CityDemo />
+      <DecayRulesList />
     </section>
   );
 }
