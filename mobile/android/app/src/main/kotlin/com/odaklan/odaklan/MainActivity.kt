@@ -15,6 +15,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
+import android.os.SystemClock
+import android.widget.RemoteViews
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -131,15 +133,22 @@ class MainActivity : FlutterActivity() {
     // One notification whose system chronometer counts down: no per-second reposts.
     private fun startCountdown() {
         val grace = graceMs ?: return
-        val endsAt = System.currentTimeMillis() + grace
         countdownRunning = true
+        // Chronometer bases use the elapsed-realtime clock.
+        val base = SystemClock.elapsedRealtime() + grace
+        fun countdownView(layout: Int) = RemoteViews(packageName, layout).apply {
+            setChronometer(R.id.countdown_timer, base, null, true)
+            setChronometerCountDown(R.id.countdown_timer, true)
+        }
+        val small = countdownView(R.layout.notification_countdown_small)
         val b = builder()
             .setContentTitle("⏳ OdakLan'a geri dön!")
             .setContentText("Süre dolunca seans bozulur ve şehrin hasar alır.")
-            .setWhen(endsAt)
-            .setShowWhen(true)
-            .setUsesChronometer(true)
-            .setChronometerCountDown(true)
+            .setStyle(Notification.DecoratedCustomViewStyle())
+            .setCustomContentView(small)
+            .setCustomHeadsUpContentView(small)
+            .setCustomBigContentView(countdownView(R.layout.notification_countdown_big))
+            .setColor(getColor(R.color.countdown_alert))
             .setOngoing(true)
             .setAutoCancel(true)
         // shortcut: if the process dies mid-countdown the "broken" update never
