@@ -109,6 +109,46 @@ void main() {
     );
   });
 
+  test('next day auto-collects unclaimed quests once', () async {
+    final c = make();
+    final p = c.read(progressProvider.notifier);
+    for (final (min, tag, stake) in [
+      (45, 'code', 5),
+      (45, 'read', 0),
+      (10, 'work', 0),
+    ]) {
+      p.record(
+        FocusSession(
+          startedAt: now,
+          planned: Duration(minutes: min),
+          phase: FocusPhase.completed,
+          endedAt: now.add(Duration(minutes: min)),
+          tag: tag,
+          stake: stake,
+        ),
+      );
+    }
+    final quests = questsFor(now);
+    expect(p.claim(quests.first), isTrue);
+    final before = c.read(walletProvider).energy;
+    final leftover = quests.skip(1).fold(0, (s, q) => s + q.reward);
+
+    now = now.add(const Duration(days: 1));
+    Future<int> energyOnOpen() async {
+      final next = make();
+      next.read(progressProvider);
+      await Future<void>.delayed(Duration.zero); // settle runs after build
+      return next.read(walletProvider).energy;
+    }
+
+    expect(
+      await energyOnOpen(),
+      before + leftover,
+      reason: 'claimed one skipped',
+    );
+    expect(await energyOnOpen(), before + leftover, reason: 'paid only once');
+  });
+
   test('a freeze bought today saves the streak after a missed day', () {
     final c = make();
     final p = c.read(progressProvider.notifier);

@@ -61,3 +61,32 @@ class LeaveAlert {
 }
 
 final leaveAlertProvider = Provider<LeaveAlert>((ref) => LeaveAlert());
+
+/// Native "yesterday's rewards were auto-collected" notification (Android).
+class RewardNotice {
+  static const _channel = MethodChannel('odaklan/screen_lock');
+
+  /// Alarm id per fire day, so one day's notice never replaces another's.
+  static int _code(DateTime day) =>
+      day.year * 10000 + day.month * 100 + day.day;
+
+  Future<void> _call(String method, Map<String, Object?> args) async {
+    try {
+      await _channel.invokeMethod<void>(method, args);
+    } on MissingPluginException {
+      // Tests / iOS: no notification.
+    }
+  }
+
+  /// Shows the notice at [at]; [energy] 0 cancels that day's notice.
+  Future<void> schedule(DateTime at, int energy) => _call(
+    'scheduleRewardNotice',
+    {'code': _code(at), 'atMs': at.millisecondsSinceEpoch, 'energy': energy},
+  );
+
+  /// Shows it now instead of at the alarm scheduled for [day].
+  Future<void> showNow(DateTime day, int energy) =>
+      _call('showRewardNotice', {'code': _code(day), 'energy': energy});
+}
+
+final rewardNoticeProvider = Provider<RewardNotice>((ref) => RewardNotice());

@@ -106,6 +106,23 @@ class MainActivity : FlutterActivity() {
                         stopCountdown()
                         result.success(null)
                     }
+                    "scheduleRewardNotice" -> {
+                        RewardNotice.schedule(
+                            this,
+                            call.argument<Int>("code") ?: 0,
+                            call.argument<Number>("atMs")?.toLong() ?: 0L,
+                            call.argument<Int>("energy") ?: 0,
+                        )
+                        result.success(null)
+                    }
+                    "showRewardNotice" -> {
+                        RewardNotice.showNow(
+                            this,
+                            call.argument<Int>("code") ?: 0,
+                            call.argument<Int>("energy") ?: 0,
+                        )
+                        result.success(null)
+                    }
                     else -> result.notImplemented()
                 }
             }

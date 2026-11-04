@@ -90,6 +90,10 @@ void main() {
   test('corrupt persisted session is ignored', () async {
     await prefs.setString('focus.active', '{not json');
     final c = await makeContainer();
-    expect(c.read(focusProvider), (active: null, lastEnded: null, credited: null));
+    expect(c.read(focusProvider), (
+      active: null,
+      lastEnded: null,
+      credited: null,
+    ));
   });
 }

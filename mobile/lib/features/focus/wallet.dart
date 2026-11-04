@@ -41,3 +41,16 @@ class WalletNotifier extends Notifier<Wallet> {
 final walletProvider = NotifierProvider<WalletNotifier, Wallet>(
   WalletNotifier.new,
 );
+
+/// Enerji already paid but still flying to the balance chip; the chip adds
+/// it on impact.
+class EnergyInFlight extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void add(int energy) => state += energy;
+}
+
+final energyInFlightProvider = NotifierProvider<EnergyInFlight, int>(
+  EnergyInFlight.new,
+);

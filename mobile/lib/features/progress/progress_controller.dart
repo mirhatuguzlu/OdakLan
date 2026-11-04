@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:odaklan_core/odaklan_core.dart';
 
@@ -41,6 +42,10 @@ class ProgressController extends Notifier<ProgressState> {
   static const _frozenKey = 'progress.frozen';
   static const _freezesKey = 'progress.freezes';
   static const _claimedKey = 'progress.claimed';
+  static const _settledKey = 'progress.settled';
+
+  /// When the auto-collect notice for a day's leftovers goes off, next day.
+  static const noticeHour = 9;
 
   // shortcut: whole history in one prefs string; move to sqlite/server when
   // users exceed a few thousand sessions.
@@ -51,6 +56,11 @@ class ProgressController extends Notifier<ProgressState> {
   @override
   ProgressState build() {
     final prefs = ref.watch(prefsProvider);
+    // Catch up on a new day even if the app stayed alive overnight.
+    final lifecycle = AppLifecycleListener(onResume: settle);
+    ref.onDispose(lifecycle.dispose);
+    // Providers may not modify other providers while building.
+    Future.microtask(settle);
     final log = [
       for (final j in _list(prefs.getString(_logKey))) ?LogEntry.tryFromJson(j),
     ];
@@ -118,6 +128,7 @@ class ProgressController extends Notifier<ProgressState> {
     ref
         .read(prefsProvider)
         .setString(_logKey, jsonEncode([for (final e in log) e.toJson()]));
+    _scheduleNotice();
   }
 
   /// Returns false when not affordable or already holding the maximum.
@@ -138,6 +149,8 @@ class ProgressController extends Notifier<ProgressState> {
 
   /// Pays a finished, unclaimed quest of today. Returns false otherwise.
   bool claim(Quest q) {
+    // Pay past leftovers before today's claim replaces the claimed set.
+    settle();
     final today = _today();
     if (!questsFor(today).any((t) => t.id == q.id)) return false;
     if (state.isClaimed(q, today)) return false;
@@ -158,7 +171,62 @@ class ProgressController extends Notifier<ProgressState> {
         );
     ref.read(walletProvider.notifier).add(FocusReward(energy: q.reward, xp: 0));
     HapticFeedback.heavyImpact();
+    _scheduleNotice();
     return true;
+  }
+
+  /// Energy of finished quests on [day] that weren't claimed.
+  int _unclaimed(DateTime day) => questsFor(day)
+      .where(
+        (q) =>
+            !state.isClaimed(q, day) && q.progress(state.on(day)) >= q.target,
+      )
+      .fold(0, (sum, q) => sum + q.reward);
+
+  /// Auto-collects finished but unclaimed quests of past days, once each
+  /// (at most a week back). Returns the Enerji paid.
+  int settle() {
+    final prefs = ref.read(prefsProvider);
+    final today = _today();
+    final yesterday = addDays(today, -1);
+    final settled = _day(prefs.getString(_settledKey) ?? '');
+    var day = settled == null ? yesterday : addDays(settled, 1);
+    if (day.isBefore(addDays(today, -7))) day = addDays(today, -7);
+    var paid = 0;
+    for (; day.isBefore(today); day = addDays(day, 1)) {
+      // Claims of days before the last claim day aren't stored: paying
+      // nothing beats paying twice (only reachable on upgrade).
+      final lastClaim = state.claimedDay;
+      if (lastClaim != null && day.isBefore(lastClaim)) continue;
+      paid += _unclaimed(day);
+    }
+    if (settled == null || settled.isBefore(yesterday)) {
+      prefs.setString(_settledKey, _dayStr(yesterday));
+    }
+    if (paid > 0) {
+      ref.read(walletProvider.notifier).add(FocusReward(energy: paid, xp: 0));
+      // Before the scheduled notice fires, show it now instead.
+      final noticeAt = today.add(const Duration(hours: noticeHour));
+      if (ref.read(clockProvider)().isBefore(noticeAt)) {
+        ref.read(rewardNoticeProvider).showNow(today, paid);
+      }
+    }
+    _scheduleNotice();
+    return paid;
+  }
+
+  // shortcut: Android drops alarms on reboot, so that notice is lost (the
+  // Enerji is still paid on next open); re-schedule on BOOT_COMPLETED if
+  // users miss it.
+  /// Tells tomorrow morning what today's leftovers will pay.
+  void _scheduleNotice() {
+    final today = _today();
+    ref
+        .read(rewardNoticeProvider)
+        .schedule(
+          addDays(today, 1).add(const Duration(hours: noticeHour)),
+          _unclaimed(today),
+        );
   }
 
   void _saveStreak(ProgressState s) {

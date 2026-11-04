@@ -7,8 +7,12 @@ import 'package:odaklan_core/odaklan_core.dart';
 
 import '../../app/services.dart';
 import '../../app/theme.dart';
+import '../focus/energy_flight.dart';
 import '../focus/wallet_chips.dart';
 import 'progress_controller.dart';
+
+/// Where claimed quest Enerji flies to.
+final _walletEnergyKey = GlobalKey(debugLabel: 'profileEnergy');
 
 /// Profil tab: streak, daily quests and the focus map (stats).
 class ProgressScreen extends ConsumerWidget {
@@ -24,7 +28,10 @@ class ProgressScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Profil'),
         centerTitle: false,
-        actions: const [WalletChips(), SizedBox(width: 12)],
+        actions: [
+          WalletChips(energyKey: _walletEnergyKey),
+          const SizedBox(width: 12),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
@@ -179,7 +186,7 @@ class _StreakCard extends ConsumerWidget {
 
 // ---------------------------------------------------------------- Quests
 
-class _QuestTile extends ConsumerWidget {
+class _QuestTile extends ConsumerStatefulWidget {
   const _QuestTile({required this.q, required this.p, required this.today});
 
   final Quest q;
@@ -187,7 +194,28 @@ class _QuestTile extends ConsumerWidget {
   final DateTime today;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_QuestTile> createState() => _QuestTileState();
+}
+
+class _QuestTileState extends ConsumerState<_QuestTile> {
+  final _boltKey = GlobalKey();
+
+  void _claim() {
+    // Measure first: claiming swaps the button for a check mark.
+    final from = rectOf(_boltKey);
+    if (ref.read(progressProvider.notifier).claim(widget.q)) {
+      flyEnergy(
+        context,
+        from: from,
+        to: _walletEnergyKey,
+        amount: widget.q.reward,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final (q, p, today) = (widget.q, widget.p, widget.today);
     final progress = q.progress(p.on(today));
     final done = progress >= q.target;
     final claimed = p.isClaimed(q, today);
@@ -233,10 +261,8 @@ class _QuestTile extends ConsumerWidget {
               const Icon(Icons.check_circle, color: AppColors.success)
             else
               FilledButton.tonalIcon(
-                onPressed: done
-                    ? () => ref.read(progressProvider.notifier).claim(q)
-                    : null,
-                icon: const Icon(Icons.bolt, size: 16),
+                onPressed: done ? _claim : null,
+                icon: Icon(Icons.bolt, key: _boltKey, size: 16),
                 label: Text('+${q.reward}'),
               ),
           ],
