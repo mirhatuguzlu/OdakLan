@@ -57,6 +57,7 @@ export function ProgressDemo() {
           </p>
           <p className="mt-1 text-sm text-muted">
             Her gün herkese bu havuzdan aynı {p.questsPerDay} görev düşer. Arkadaşınla aynı hedefe koşarsın.
+            Toplamayı unuttuğun ödüller ertesi gün kendiliğinden toplanır.
           </p>
           <ul className="mt-5 divide-y divide-line">
             {p.quests.map((q) => (

@@ -102,8 +102,9 @@ const features = <Feature>[
     id: 'anti_doomscroll',
     title: 'Kaydırma Kalkanı',
     description:
-        'Telefonu kilitlemek serbest. Başka uygulamaya geçersen seans bozulur; '
-        'tamamlanan bloklar yine senin.',
+        'Telefonu kilitlemek serbest. Başka uygulamaya geçersen bildirimde canlı '
+        'bir geri sayım başlar; dönmezsen seans bozulur, tamamlanan bloklar yine '
+        'senin. (Geri sayım bildirimi şimdilik Android’de.)',
     status: FeatureStatus.ready,
   ),
   Feature(
@@ -156,8 +157,9 @@ const features = <Feature>[
     id: 'quests',
     title: 'Seriler ve Görevler',
     description:
-        'Her gün herkese aynı 3 görev. Serini koru; kaçırdığın bir günü '
-        'Enerjiyle aldığın Seri Kalkanı kurtarır.',
+        'Her gün herkese aynı 3 görev. Toplamayı unuttuğun ödüller ertesi gün '
+        'kendiliğinden toplanır ve bildirimle haber verilir. Serini koru; '
+        'kaçırdığın bir günü Enerjiyle aldığın Seri Kalkanı kurtarır.',
     status: FeatureStatus.ready,
   ),
   Feature(

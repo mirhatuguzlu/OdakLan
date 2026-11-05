@@ -11,7 +11,7 @@ const rules = manifest.focusRules;
 const STEPS = [
   [Timer, "Süreni seç", `${rules.presets.map((p) => p.minutes).join(", ")} dakikalık seanslardan birini başlat.`],
   [Lock, "Telefonu bırak", "Ekranı kilitlemek serbest; seans sen dokunmadıkça işler."],
-  [LogOut, "Kaçarsan bozulur", `Başka bir uygulamaya geçersen ${rules.leaveGraceSeconds} saniye sonra seans bozulur.`],
+  [LogOut, "Kaçarsan bozulur", `Başka bir uygulamaya geçersen bildirimde ${rules.leaveGraceSeconds} saniyelik geri sayım başlar; dönmezsen seans bozulur.`],
   [Zap, "Enerji topla", `Her ${rules.energyBlockMinutes} dakika 1 Enerji. Bitirirsen bonus Enerji ve iki kat XP.`],
 ] as const;
 
