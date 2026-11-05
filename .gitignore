@@ -6,3 +6,4 @@
 !.env.example
 .dart_tool/
 build/
+mobile/env.json

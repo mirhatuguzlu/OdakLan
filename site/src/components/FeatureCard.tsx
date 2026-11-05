@@ -1,5 +1,5 @@
 import {
-  Ban, Building2, ChartColumn, Handshake, Flame, Lock, Radar, ShieldCheck, Sparkles, Timer, Users,
+  Ban, Building2, ChartColumn, Handshake, Flame, KeyRound, Lock, Radar, ShieldCheck, Sparkles, Timer, Users,
   type LucideIcon,
 } from "lucide-react";
 import type { Feature, FeatureStatus } from "@/content/manifest";
@@ -14,6 +14,7 @@ const ICONS: Record<string, LucideIcon> = {
   fair_rewards: ShieldCheck,
   quests: Flame,
   social_detect: Radar,
+  account: KeyRound,
   privacy: Lock,
 };
 

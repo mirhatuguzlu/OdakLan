@@ -5,12 +5,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'app/router.dart';
 import 'app/services.dart';
 import 'app/theme.dart';
+import 'features/account/account.dart';
 import 'features/focus/focus_controller.dart';
 import 'features/progress/progress_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
+  await initBackend();
   runApp(
     ProviderScope(
       overrides: [prefsProvider.overrideWithValue(prefs)],

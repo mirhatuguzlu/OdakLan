@@ -7,6 +7,7 @@ import 'package:odaklan_core/odaklan_core.dart';
 
 import '../../app/services.dart';
 import '../../app/theme.dart';
+import '../account/account_card.dart';
 import '../focus/energy_flight.dart';
 import '../focus/wallet_chips.dart';
 import 'progress_controller.dart';
@@ -36,6 +37,8 @@ class ProgressScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
+          const AccountCard(),
+          const SizedBox(height: 12),
           _StreakCard(p: p, today: today),
           const _Heading('Bugünün görevleri'),
           for (final q in questsFor(today))

@@ -1,5 +1,5 @@
 {
-  "appVersion": "0.4.0",
+  "appVersion": "0.5.0",
   "focusRules": {
     "energyBlockMinutes": 10,
     "leaveGraceSeconds": 10,
@@ -268,9 +268,15 @@
       "platformNote": "Yalnızca Android"
     },
     {
+      "id": "account",
+      "title": "Google ile Giriş",
+      "description": "Tek dokunuşla Google hesabınla gir. Hesap şart değil: giriş yapmadan da odaklanabilir, şehrini kurabilirsin. Oturum anahtarın telefonun güvenli kasasında saklanır.",
+      "status": "ready"
+    },
+    {
       "id": "privacy",
       "title": "Gizlilik Önce",
-      "description": "Yalnızca e-posta ve takma ad. Mesajlarına, galerine dokunmayız. KVKK uyumlu.",
+      "description": "Gerçek adın saklanmaz: yalnızca e-postan ve rastgele bir takma ad. Mesajlarına, galerine dokunmayız. KVKK uyumlu.",
       "status": "planned"
     }
   ],
@@ -298,7 +304,7 @@
     {
       "number": 5,
       "title": "Hesaplar ve güvenli veritabanı",
-      "done": false
+      "done": true
     },
     {
       "number": 6,

@@ -87,7 +87,7 @@ class RoadmapStep {
   final bool done;
 }
 
-const appVersion = '0.4.0';
+const appVersion = '0.5.0';
 
 const features = <Feature>[
   Feature(
@@ -171,10 +171,19 @@ const features = <Feature>[
     platformNote: 'Yalnızca Android',
   ),
   Feature(
+    id: 'account',
+    title: 'Google ile Giriş',
+    description:
+        'Tek dokunuşla Google hesabınla gir. Hesap şart değil: giriş yapmadan da '
+        'odaklanabilir, şehrini kurabilirsin. Oturum anahtarın telefonun güvenli kasasında saklanır.',
+    status: FeatureStatus.ready,
+  ),
+  Feature(
     id: 'privacy',
     title: 'Gizlilik Önce',
     description:
-        'Yalnızca e-posta ve takma ad. Mesajlarına, galerine dokunmayız. KVKK uyumlu.',
+        'Gerçek adın saklanmaz: yalnızca e-postan ve rastgele bir takma ad. '
+        'Mesajlarına, galerine dokunmayız. KVKK uyumlu.',
     status: FeatureStatus.planned,
   ),
 ];
@@ -184,7 +193,7 @@ const roadmap = <RoadmapStep>[
   RoadmapStep(2, 'Odak motoru ve zamanlayıcı', done: true),
   RoadmapStep(3, 'Siber şehir ve seviyeler', done: true),
   RoadmapStep(4, 'Seriler, görevler, Odak Sözleşmesi, istatistik', done: true),
-  RoadmapStep(5, 'Hesaplar ve güvenli veritabanı'),
+  RoadmapStep(5, 'Hesaplar ve güvenli veritabanı', done: true),
   RoadmapStep(6, 'Sunucu doğrulamalı seanslar'),
   RoadmapStep(7, 'Odak Klanları ve ortak kale'),
   RoadmapStep(8, 'Bildirimler ve hatırlatıcılar'),
