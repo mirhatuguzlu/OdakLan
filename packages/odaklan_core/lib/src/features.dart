@@ -182,7 +182,7 @@ const features = <Feature>[
     id: 'privacy',
     title: 'Gizlilik Önce',
     description:
-        'Gerçek adın saklanmaz: yalnızca e-postan ve rastgele bir takma ad. '
+        'Başkalarına yalnızca rastgele takma adın görünür; Google adın ve e-postan hiçbir oyuncuya gösterilmez. '
         'Mesajlarına, galerine dokunmayız. KVKK uyumlu.',
     status: FeatureStatus.planned,
   ),
