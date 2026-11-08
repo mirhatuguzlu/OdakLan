@@ -5,7 +5,25 @@ import 'package:odaklan/app/services.dart';
 import 'package:odaklan/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'support.dart';
+
 void main() {
+  testWidgets('signed out: only the sign-in screen', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [prefsProvider.overrideWithValue(prefs)],
+        child: const OdakLanApp(),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('OdakLan'), findsOneWidget);
+    // Test builds have no server keys.
+    expect(find.textContaining('sunucu ayarları eksik'), findsOneWidget);
+    expect(find.text('Ne kadar odaklanacaksın?'), findsNothing);
+  });
+
   testWidgets('start a session, give up, see result; tabs switch', (
     tester,
   ) async {
@@ -15,10 +33,11 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          prefsProvider.overrideWithValue(prefs),
-          clockProvider.overrideWithValue(() => now),
-        ],
+        overrides: signedIn(
+          prefs: prefs,
+          clock: () => now,
+          server: LocalGameBackend(() => now),
+        ),
         child: const OdakLanApp(),
       ),
     );

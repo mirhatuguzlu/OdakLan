@@ -1,5 +1,5 @@
 {
-  "appVersion": "0.5.0",
+  "appVersion": "0.6.0",
   "focusRules": {
     "energyBlockMinutes": 10,
     "leaveGraceSeconds": 10,
@@ -251,8 +251,8 @@
     {
       "id": "fair_rewards",
       "title": "Hilesiz Ödüller",
-      "description": "Ödüller sunucuda, sunucu saatiyle hesaplanır; saat oynatmak işe yaramaz.",
-      "status": "planned"
+      "description": "Enerji, XP, şehir, görevler ve seri sunucuda, sunucu saatiyle hesaplanır. Telefonun saatini oynatmak ya da uygulamayı kurcalamak işe yaramaz.",
+      "status": "ready"
     },
     {
       "id": "quests",
@@ -270,7 +270,7 @@
     {
       "id": "account",
       "title": "Google ile Giriş",
-      "description": "Tek dokunuşla Google hesabınla gir. Hesap şart değil: giriş yapmadan da odaklanabilir, şehrini kurabilirsin. Oturum anahtarın telefonun güvenli kasasında saklanır.",
+      "description": "Tek dokunuşla Google hesabınla gir. Şehrin, Enerjin ve serin hesabında saklanır; telefon değişse de kaybolmaz. Oturum anahtarın telefonun güvenli kasasında durur.",
       "status": "ready"
     },
     {
@@ -309,7 +309,7 @@
     {
       "number": 6,
       "title": "Sunucu doğrulamalı seanslar",
-      "done": false
+      "done": true
     },
     {
       "number": 7,

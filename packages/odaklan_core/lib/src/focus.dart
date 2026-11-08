@@ -197,12 +197,20 @@ class FocusSession {
   FocusSession giveUp(DateTime now) =>
       isRunning ? _end(FocusPhase.gaveUp, now) : this;
 
+  /// Ends a running session as [phase] at [at] (the server applying a
+  /// client report it has already validated).
+  FocusSession endAs(FocusPhase phase, DateTime at) {
+    if (!isRunning || phase == FocusPhase.running) return this;
+    return _end(phase, at);
+  }
+
   Map<String, Object?> toJson() => {
-    'startedAt': startedAt.toUtc().toIso8601String(),
+    // Wall-clock times: the server stores the player's local clock.
+    'startedAt': startedAt.toIso8601String(),
     'plannedSeconds': planned.inSeconds,
     'phase': phase.name,
-    'backgroundedAt': backgroundedAt?.toUtc().toIso8601String(),
-    'endedAt': endedAt?.toUtc().toIso8601String(),
+    'backgroundedAt': backgroundedAt?.toIso8601String(),
+    'endedAt': endedAt?.toIso8601String(),
     'stake': stake,
     'tag': tag,
   };

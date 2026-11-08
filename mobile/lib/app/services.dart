@@ -7,8 +7,22 @@ final prefsProvider = Provider<SharedPreferences>(
   (ref) => throw UnimplementedError('prefsProvider must be overridden'),
 );
 
-/// Injectable clock so tests can control time.
-final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
+/// Server clock minus phone clock, learned from every game reply, so
+/// countdowns and reports line up with the server.
+class ClockSkew extends Notifier<Duration> {
+  @override
+  Duration build() => Duration.zero;
+
+  void set(Duration skew) => state = skew;
+}
+
+final clockSkewProvider = NotifierProvider<ClockSkew, Duration>(ClockSkew.new);
+
+/// The phone clock corrected to the server. Injectable so tests control time.
+final clockProvider = Provider<DateTime Function()>((ref) {
+  final skew = ref.watch(clockSkewProvider);
+  return () => DateTime.now().add(skew);
+});
 
 typedef LockEvents = ({DateTime? lockedAt, DateTime? unlockedAt});
 

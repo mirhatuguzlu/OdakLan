@@ -10,7 +10,7 @@ import '../../app/theme.dart';
 import '../account/account_card.dart';
 import '../focus/energy_flight.dart';
 import '../focus/wallet_chips.dart';
-import 'progress_controller.dart';
+import '../game/game.dart';
 
 /// Where claimed quest Enerji flies to.
 final _walletEnergyKey = GlobalKey(debugLabel: 'profileEnergy');
@@ -21,7 +21,7 @@ class ProgressScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final p = ref.watch(progressProvider);
+    final p = ref.watch(gameStateProvider);
     final today = ref.read(clockProvider)();
     final stats = p.stats;
 
@@ -107,7 +107,7 @@ class _Card extends StatelessWidget {
 class _StreakCard extends ConsumerWidget {
   const _StreakCard({required this.p, required this.today});
 
-  final ProgressState p;
+  final GameState p;
   final DateTime today;
 
   @override
@@ -167,15 +167,7 @@ class _StreakCard extends ConsumerWidget {
               TextButton.icon(
                 onPressed: p.freezes >= maxFreezes
                     ? null
-                    : () {
-                        if (!ref.read(progressProvider.notifier).buyFreeze()) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Yeterli Enerjin yok.'),
-                            ),
-                          );
-                        }
-                      },
+                    : () => playAction(context, ref, const BuyFreeze()),
                 icon: const Icon(Icons.bolt, size: 16),
                 label: const Text('$freezeCost'),
               ),
@@ -193,7 +185,7 @@ class _QuestTile extends ConsumerStatefulWidget {
   const _QuestTile({required this.q, required this.p, required this.today});
 
   final Quest q;
-  final ProgressState p;
+  final GameState p;
   final DateTime today;
 
   @override
@@ -203,10 +195,11 @@ class _QuestTile extends ConsumerStatefulWidget {
 class _QuestTileState extends ConsumerState<_QuestTile> {
   final _boltKey = GlobalKey();
 
-  void _claim() {
+  Future<void> _claim() async {
     // Measure first: claiming swaps the button for a check mark.
     final from = rectOf(_boltKey);
-    if (ref.read(progressProvider.notifier).claim(widget.q)) {
+    final r = await playAction(context, ref, ClaimQuest(widget.q.id));
+    if (r != null && mounted) {
       flyEnergy(
         context,
         from: from,

@@ -5,7 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme.dart';
-import 'wallet.dart';
+import '../game/game.dart';
 
 /// Enerji + XP balance for app bars. [energyKey] marks the Enerji icon as a
 /// target for [flyEnergy].

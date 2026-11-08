@@ -7,25 +7,31 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:odaklan_core/odaklan_core.dart';
 
 import '../../app/services.dart';
-import '../city/city_controller.dart';
-import '../progress/progress_controller.dart';
-import 'wallet.dart';
+import '../game/game.dart';
 
-/// [credited] = what the last ended session paid, city bonuses included.
+/// [credited] = what the server paid for [lastEnded], city bonus included
+/// (null until the server has accepted the report).
 typedef FocusState = ({
   FocusSession? active,
   FocusSession? lastEnded,
   FocusReward? credited,
 });
 
-/// Runs the current focus session: ticks it, watches the app lifecycle,
-/// persists it, and credits the wallet (reward + contract) and the history
-/// exactly once when it ends.
+/// Runs the current focus session on the phone: ticks it, watches the app
+/// lifecycle and screen lock, and reports how it ended to the server, which
+/// alone decides what it pays. A report that can't be sent (offline, app
+/// killed) is kept and re-sent until the server takes it.
 class FocusController extends Notifier<FocusState> {
+  /// The running session: server times plus phone-only leave tracking.
   static const _activeKey = 'focus.active';
 
+  /// A finish report the server hasn't accepted yet.
+  static const _pendingKey = 'focus.pending';
+
   Timer? _timer;
+  Timer? _retry;
   AppLifecycleListener? _lifecycle;
+  var _sending = false;
 
   DateTime _now() => ref.read(clockProvider)();
 
@@ -34,8 +40,12 @@ class FocusController extends Notifier<FocusState> {
     _lifecycle = AppLifecycleListener(onHide: onHidden, onShow: onShown);
     ref.onDispose(() {
       _timer?.cancel();
+      _retry?.cancel();
       _lifecycle?.dispose();
     });
+    ref.listen(gameProvider, (_, next) {
+      if (next.value case final g?) Future.microtask(() => _reconcile(g));
+    }, fireImmediately: true);
 
     final raw = ref.read(prefsProvider).getString(_activeKey);
     var restored = raw == null ? null : FocusSession.tryFromJson(_decode(raw));
@@ -53,16 +63,13 @@ class FocusController extends Notifier<FocusState> {
     }
     if (restored == null || !restored.isRunning) {
       if (restored != null) {
-        ref.read(sessionKeeperProvider).ended();
         final ended = restored;
-        ref.read(prefsProvider).remove(_activeKey);
-        // Providers may not modify other providers while building.
-        Future.microtask(() {
-          final paid = _credit(ended);
-          state = (active: null, lastEnded: ended, credited: paid);
-        });
+        // Providers may not modify state while building.
+        Future.microtask(() => _finish(ended));
+      } else {
+        Future.microtask(_flushPending);
       }
-      return (active: null, lastEnded: restored, credited: null);
+      return (active: null, lastEnded: null, credited: null);
     }
     _keepAlive(restored);
     _startTimer();
@@ -77,19 +84,56 @@ class FocusController extends Notifier<FocusState> {
     }
   }
 
-  /// Returns false (nothing starts) when the stake can't be paid.
-  bool start(Duration planned, {int stake = 0, String? tag}) {
-    if (state.active != null) return false;
-    final session = FocusSession.start(_now(), planned, stake: stake, tag: tag);
-    if (stake > 0 && !ref.read(walletProvider.notifier).spend(stake)) {
-      return false;
+  /// The server's session wins: adopt one started elsewhere, drop one the
+  /// server already closed.
+  void _reconcile(GameState g) {
+    if (!ref.mounted || _sending) return;
+    if (ref.read(prefsProvider).getString(_pendingKey) != null) {
+      _flushPending();
+      return;
     }
+    final server = g.active;
+    final local = state.active;
+    if (server == null) {
+      if (local != null) {
+        _timer?.cancel();
+        ref.read(prefsProvider).remove(_activeKey);
+        ref.read(sessionKeeperProvider).ended();
+        state = (active: null, lastEnded: null, credited: null);
+      }
+      return;
+    }
+    if (local != null && local.startedAt == server.startedAt) return;
+    _set(server);
+    _keepAlive(server);
+    _startTimer();
+  }
+
+  /// Starts on the server (its clock). Returns the refusal, or null.
+  /// Throws [GameOffline].
+  Future<GameError?> start(
+    Duration planned, {
+    int stake = 0,
+    String? tag,
+  }) async {
+    if (state.active != null || _sending) return GameError.alreadyRunning;
+    _sending = true;
+    final GameResult r;
+    try {
+      r = await ref
+          .read(gameProvider.notifier)
+          .act(StartSession(planned.inMinutes, stake: stake, tag: tag));
+    } finally {
+      _sending = false;
+    }
+    if (!r.ok) return r.error;
+    final session = r.state.active!;
     HapticFeedback.mediumImpact();
     ref.read(leaveAlertProvider).requestPermission();
-    _keepAlive(session);
     _set(session);
+    _keepAlive(session);
     _startTimer();
-    return true;
+    return null;
   }
 
   void giveUp() => _update(state.active?.giveUp(_now()));
@@ -114,6 +158,8 @@ class FocusController extends Notifier<FocusState> {
     // Always take: the log keeps the FIRST lock since the last take, so
     // events from outside a session must not linger into the next one.
     final lock = await ref.read(screenLockProvider).take();
+    if (!ref.mounted) return;
+    unawaited(_flushPending());
     if (state.active?.backgroundedAt == null) return;
     _update(
       state.active?.resumed(
@@ -170,30 +216,52 @@ class FocusController extends Notifier<FocusState> {
     ref.read(prefsProvider).setString(_activeKey, jsonEncode(session.toJson()));
   }
 
+  /// Ended on the phone: show it now, report it to the server.
   void _finish(FocusSession ended) {
     _timer?.cancel();
+    final prefs = ref.read(prefsProvider);
+    prefs.remove(_activeKey);
+    prefs.setString(
+      _pendingKey,
+      jsonEncode(FinishSession(ended.phase, ended.endedAt!).toJson()),
+    );
     ref.read(sessionKeeperProvider).ended();
-    ref.read(prefsProvider).remove(_activeKey);
-    final paid = _credit(ended);
     ended.phase == FocusPhase.completed
         ? HapticFeedback.heavyImpact()
         : HapticFeedback.vibrate();
-    state = (active: null, lastEnded: ended, credited: paid);
+    state = (active: null, lastEnded: ended, credited: null);
+    unawaited(_flushPending());
   }
 
-  /// Pays the reward boosted by the city as it was during the session,
-  /// then lets the city take the repair or damage.
-  FocusReward _credit(FocusSession ended) {
-    final completed = ended.phase == FocusPhase.completed;
-    final paid = ref
-        .read(cityProvider)
-        .boosted(ended.reward, completed: completed);
-    ref
-        .read(walletProvider.notifier)
-        .add(FocusReward(energy: paid.energy + ended.stakeReturn, xp: paid.xp));
-    ref.read(progressProvider.notifier).record(ended);
-    ref.read(cityProvider.notifier).afterSession(ended);
-    return paid;
+  /// Sends the kept finish report, if any. Offline → kept for next time.
+  Future<void> _flushPending() async {
+    final prefs = ref.read(prefsProvider);
+    final raw = prefs.getString(_pendingKey);
+    if (raw == null || _sending) return;
+    final action = GameAction.tryFromJson(_decode(raw));
+    if (action is! FinishSession) {
+      prefs.remove(_pendingKey);
+      return;
+    }
+    _sending = true;
+    try {
+      final r = await ref.read(gameProvider.notifier).act(action);
+      if (!ref.mounted) return;
+      // Phone clock ahead of the server, or spamming: try again shortly.
+      if (r.error == GameError.tooEarly || r.error == GameError.rateLimited) {
+        _retry?.cancel();
+        _retry = Timer(const Duration(seconds: 30), _flushPending);
+        return;
+      }
+      prefs.remove(_pendingKey);
+      if (r.ended case final ended?) {
+        state = (active: state.active, lastEnded: ended, credited: r.credited);
+      }
+    } on GameOffline {
+      // Kept; re-sent on the next app show or start.
+    } finally {
+      _sending = false;
+    }
   }
 }
 

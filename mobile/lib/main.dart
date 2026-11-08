@@ -6,12 +6,26 @@ import 'app/router.dart';
 import 'app/services.dart';
 import 'app/theme.dart';
 import 'features/account/account.dart';
-import 'features/focus/focus_controller.dart';
-import 'features/progress/progress_controller.dart';
+import 'features/account/gate.dart';
+
+/// Local game data from before progress moved to the server (step 6).
+const _legacyKeys = [
+  'wallet.energy',
+  'wallet.xp',
+  'city.levels',
+  'progress.log',
+  'progress.frozen',
+  'progress.freezes',
+  'progress.claimed',
+  'progress.settled',
+];
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
+  for (final k in _legacyKeys) {
+    await prefs.remove(k);
+  }
   await initBackend();
   runApp(
     ProviderScope(
@@ -25,17 +39,11 @@ class OdakLanApp extends ConsumerWidget {
   const OdakLanApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Keep the focus session (and its lifecycle listener) alive app-wide
-    // without rebuilding the app on every tick.
-    ref.listen(focusProvider, (_, _) {});
-    // Auto-collects yesterday's unclaimed quest rewards on open.
-    ref.listen(progressProvider, (_, _) {});
-    return MaterialApp.router(
-      title: 'OdakLan',
-      debugShowCheckedModeBanner: false,
-      theme: buildTheme(),
-      routerConfig: ref.watch(routerProvider),
-    );
-  }
+  Widget build(BuildContext context, WidgetRef ref) => MaterialApp.router(
+    title: 'OdakLan',
+    debugShowCheckedModeBanner: false,
+    theme: buildTheme(),
+    routerConfig: ref.watch(routerProvider),
+    builder: (context, child) => Gate(child: child!),
+  );
 }

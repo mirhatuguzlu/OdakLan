@@ -7,10 +7,10 @@ import 'package:odaklan_core/odaklan_core.dart';
 import '../../app/services.dart';
 import '../../app/theme.dart';
 import '../progress/streak_chip.dart';
-import '../city/city_controller.dart';
+import '../city/city_events.dart';
+import '../game/game.dart';
 import 'focus_controller.dart';
 import 'focus_ring.dart';
-import 'wallet.dart';
 import 'wallet_chips.dart';
 
 class FocusScreen extends ConsumerWidget {
@@ -61,18 +61,28 @@ class _IdleState extends ConsumerState<_Idle> {
   int _stake = 0;
   String? _tag;
 
-  void _start() {
-    final ok = ref
-        .read(focusProvider.notifier)
-        .start(
-          Duration(minutes: _minutes),
-          stake: _stake,
-          tag: _tag,
+  var _busy = false;
+
+  Future<void> _start() async {
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _busy = true);
+    try {
+      final refused = await ref
+          .read(focusProvider.notifier)
+          .start(
+            Duration(minutes: _minutes),
+            stake: _stake,
+            tag: _tag,
+          );
+      if (refused != null) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(describeGameError(refused))),
         );
-    if (!ok) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Sözleşme için yeterli Enerjin yok.')),
-      );
+      }
+    } on GameOffline {
+      messenger.showSnackBar(const SnackBar(content: Text(offlineMessage)));
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -173,7 +183,7 @@ class _IdleState extends ConsumerState<_Idle> {
         SizedBox(
           width: double.infinity,
           child: FilledButton(
-            onPressed: _start,
+            onPressed: _busy ? null : _start,
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 18),
               textStyle: const TextStyle(

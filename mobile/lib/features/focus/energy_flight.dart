@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme.dart';
-import 'wallet.dart';
+import '../game/game.dart';
 
 /// Global rect of a laid-out widget, or null.
 Rect? rectOf(GlobalKey key) {

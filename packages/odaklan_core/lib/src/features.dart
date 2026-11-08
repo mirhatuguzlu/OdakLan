@@ -87,7 +87,7 @@ class RoadmapStep {
   final bool done;
 }
 
-const appVersion = '0.5.0';
+const appVersion = '0.6.0';
 
 const features = <Feature>[
   Feature(
@@ -151,8 +151,9 @@ const features = <Feature>[
     id: 'fair_rewards',
     title: 'Hilesiz Ödüller',
     description:
-        'Ödüller sunucuda, sunucu saatiyle hesaplanır; saat oynatmak işe yaramaz.',
-    status: FeatureStatus.planned,
+        'Enerji, XP, şehir, görevler ve seri sunucuda, sunucu saatiyle hesaplanır. '
+        'Telefonun saatini oynatmak ya da uygulamayı kurcalamak işe yaramaz.',
+    status: FeatureStatus.ready,
   ),
   Feature(
     id: 'quests',
@@ -175,8 +176,8 @@ const features = <Feature>[
     id: 'account',
     title: 'Google ile Giriş',
     description:
-        'Tek dokunuşla Google hesabınla gir. Hesap şart değil: giriş yapmadan da '
-        'odaklanabilir, şehrini kurabilirsin. Oturum anahtarın telefonun güvenli kasasında saklanır.',
+        'Tek dokunuşla Google hesabınla gir. Şehrin, Enerjin ve serin hesabında saklanır; '
+        'telefon değişse de kaybolmaz. Oturum anahtarın telefonun güvenli kasasında durur.',
     status: FeatureStatus.ready,
   ),
   Feature(
@@ -195,7 +196,7 @@ const roadmap = <RoadmapStep>[
   RoadmapStep(3, 'Siber şehir ve seviyeler', done: true),
   RoadmapStep(4, 'Seriler, görevler, Odak Sözleşmesi, istatistik', done: true),
   RoadmapStep(5, 'Hesaplar ve güvenli veritabanı', done: true),
-  RoadmapStep(6, 'Sunucu doğrulamalı seanslar'),
+  RoadmapStep(6, 'Sunucu doğrulamalı seanslar', done: true),
   RoadmapStep(7, 'Odak Klanları ve ortak kale'),
   RoadmapStep(8, 'Bildirimler ve hatırlatıcılar'),
   RoadmapStep(9, 'Sosyal medya dedektörü (Android)'),

@@ -5,4 +5,5 @@ library;
 export 'src/city.dart';
 export 'src/features.dart';
 export 'src/focus.dart';
+export 'src/game.dart';
 export 'src/progress.dart';

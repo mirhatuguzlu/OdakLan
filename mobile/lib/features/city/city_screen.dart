@@ -3,11 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:odaklan_core/odaklan_core.dart';
 
 import '../../app/theme.dart';
-import '../focus/wallet.dart';
 import '../focus/wallet_chips.dart';
-import '../progress/progress_controller.dart';
 import '../../app/services.dart';
-import 'city_controller.dart';
+import '../game/game.dart';
+import 'city_events.dart';
 import 'city_view.dart';
 
 class CityScreen extends ConsumerWidget {
@@ -20,7 +19,7 @@ class CityScreen extends ConsumerWidget {
     final level = levelForXp(wallet.xp);
     final news = ref.watch(cityNewsProvider);
     final tendedToday = ref
-        .watch(progressProvider)
+        .watch(gameStateProvider)
         .on(ref.watch(clockProvider)())
         .fold(0, (m, e) => m + e.minutes);
 
@@ -171,7 +170,7 @@ class _BuildingTile extends ConsumerWidget {
             ),
             _ => FilledButton.tonalIcon(
               onPressed: check == UpgradeCheck.ok
-                  ? () => ref.read(cityProvider.notifier).upgrade(b)
+                  ? () => playAction(context, ref, Upgrade(b.id))
                   : null,
               icon: const Icon(Icons.bolt, size: 18),
               label: Text(

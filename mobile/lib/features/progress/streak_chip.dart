@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/services.dart';
 import '../../app/theme.dart';
 import '../focus/wallet_chips.dart';
-import 'progress_controller.dart';
+import '../game/game.dart';
 
 /// Current streak in days; amber once today is done, muted while at risk.
 class StreakChip extends ConsumerWidget {
@@ -12,7 +12,7 @@ class StreakChip extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final p = ref.watch(progressProvider);
+    final p = ref.watch(gameStateProvider);
     final today = ref.read(clockProvider)();
     final days = p.streak(today);
     final doneToday = p.on(today).any((e) => e.completed);
