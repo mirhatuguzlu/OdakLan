@@ -16,16 +16,13 @@ import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.os.SystemClock
+import android.view.WindowManager
 import android.widget.RemoteViews
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
-    // Latest screen lock/unlock times (epoch ms) since Dart last asked.
-    private var lockedAt: Long? = null
-    private var unlockedAt: Long? = null
-
     // Leave-countdown state: away from the app with a session running.
     private var graceMs: Long? = null
     private var countdownRunning = false
@@ -37,14 +34,15 @@ class MainActivity : FlutterActivity() {
         override fun onReceive(context: Context, intent: Intent) {
             when (intent.action) {
                 Intent.ACTION_SCREEN_OFF -> {
-                    lockedAt = System.currentTimeMillis()
+                    // Also logged by FocusService; this copy covers a refused service start.
+                    LockLog.locked(context)
                     // Locking inside the grace forgives the leave (FocusSession.resumed).
                     if (countdownRunning) stopCountdown()
                 }
                 Intent.ACTION_USER_PRESENT -> {
-                    unlockedAt = System.currentTimeMillis()
+                    LockLog.unlocked(context)
                     // Unlocked somewhere else: the grace starts again from now.
-                    if (graceMs != null && !countdownRunning && lockedAt != null) startCountdown()
+                    if (graceMs != null && !countdownRunning && LockLog.lockedAt(context) != null) startCountdown()
                 }
             }
         }
@@ -80,10 +78,25 @@ class MainActivity : FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "odaklan/screen_lock")
             .setMethodCallHandler { call, result ->
                 when (call.method) {
-                    "takeLockEvents" -> {
-                        result.success(mapOf("lockedAt" to lockedAt, "unlockedAt" to unlockedAt))
-                        lockedAt = null
-                        unlockedAt = null
+                    "takeLockEvents" -> result.success(LockLog.take(this))
+                    "sessionStarted" -> {
+                        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                        val end = call.argument<Number>("endMs")?.toLong()
+                        if (end != null) {
+                            FocusService.start(
+                                this,
+                                call.argument<Number>("startMs")?.toLong() ?: end,
+                                end,
+                                call.argument<String>("subtitle") ?: "",
+                                call.argument<String>("goal") ?: "",
+                            )
+                        }
+                        result.success(null)
+                    }
+                    "sessionEnded" -> {
+                        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                        FocusService.stop(this)
+                        result.success(null)
                     }
                     "requestNotificationPermission" -> {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
@@ -142,7 +155,7 @@ class MainActivity : FlutterActivity() {
             Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
-        return b.setSmallIcon(R.mipmap.ic_launcher)
+        return b.setSmallIcon(R.drawable.ic_stat_focus)
             .setContentIntent(open)
             .setCategory(Notification.CATEGORY_ALARM)
     }

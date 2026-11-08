@@ -186,6 +186,8 @@ class ProgressController extends Notifier<ProgressState> {
   /// Auto-collects finished but unclaimed quests of past days, once each
   /// (at most a week back). Returns the Enerji paid.
   int settle() {
+    // Scheduled from build(); the provider may be gone by then.
+    if (!ref.mounted) return 0;
     final prefs = ref.read(prefsProvider);
     final today = _today();
     final yesterday = addDays(today, -1);

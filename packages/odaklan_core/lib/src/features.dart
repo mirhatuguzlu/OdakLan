@@ -95,7 +95,8 @@ const features = <Feature>[
     title: 'Odak Seansı',
     description:
         'Her $energyBlockMinutes dakikalık odak 1 Enerji. Seansı bitirirsen '
-        '+1 bonus Enerji ve iki kat XP.',
+        '+1 bonus Enerji ve iki kat XP. Seans boyunca ekran açık kalır, kalan süre '
+        'bildirimde ve kilit ekranında görünür.',
     status: FeatureStatus.ready,
   ),
   Feature(

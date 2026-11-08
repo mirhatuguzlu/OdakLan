@@ -56,6 +56,47 @@ void main() {
     expect(c.read(walletProvider).energy, 0);
   });
 
+  group('system killed the app while the phone was locked', () {
+    Future<ProviderContainer> killedWhileLocked() async {
+      final first = await makeContainer();
+      final focus = first.read(focusProvider.notifier);
+      focus.start(const Duration(minutes: 25));
+      focus.onHidden();
+      // Lock times are on disk natively, so they survive the process.
+      lock.next = (
+        lockedAt: now.add(const Duration(seconds: 1)),
+        unlockedAt: null,
+      );
+      first.dispose(); // process death; the session stays in prefs
+      now = now.add(const Duration(minutes: 12));
+      return makeContainer();
+    }
+
+    test('reopening right after unlock keeps the session', () async {
+      final c = await killedWhileLocked();
+      lock.next = (
+        lockedAt: lock.next.lockedAt,
+        unlockedAt: now.subtract(const Duration(seconds: 3)),
+      );
+      c.read(focusProvider);
+      await Future<void>.delayed(Duration.zero);
+      expect(c.read(focusProvider).active?.isRunning, isTrue);
+      expect(c.read(focusProvider).active?.backgroundedAt, isNull);
+    });
+
+    test('unlocked and stayed in other apps: broken', () async {
+      final c = await killedWhileLocked();
+      lock.next = (
+        lockedAt: lock.next.lockedAt,
+        unlockedAt: now.subtract(const Duration(minutes: 2)),
+      );
+      c.read(focusProvider);
+      await Future<void>.delayed(Duration.zero);
+      expect(c.read(focusProvider).active, isNull);
+      expect(c.read(focusProvider).lastEnded?.phase, FocusPhase.broken);
+    });
+  });
+
   test('leaving the app breaks it and credits full blocks once', () async {
     final c = await makeContainer();
     final focus = c.read(focusProvider.notifier);

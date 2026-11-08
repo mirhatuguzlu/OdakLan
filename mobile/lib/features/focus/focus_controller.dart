@@ -40,15 +40,20 @@ class FocusController extends Notifier<FocusState> {
     final raw = ref.read(prefsProvider).getString(_activeKey);
     var restored = raw == null ? null : FocusSession.tryFromJson(_decode(raw));
     if (restored != null && restored.isRunning) {
-      // shortcut: if the process died in the background, the native lock
-      // times died with it, so the gap counts as leaving the app. Upgrade by
-      // persisting lock times natively if users report false breaks.
-      restored = restored.backgroundedAt != null
-          ? restored.resumed(_now())
-          : restored.tick(_now());
+      if (restored.backgroundedAt != null) {
+        // The system killed the app while away (e.g. MIUI LockScreenClean).
+        // Lock times are kept natively on disk, so judge the gap with them
+        // once this build has returned (onShown reads the state).
+        // shortcut: if the process also missed the unlock, the time since
+        // locking counts as locked; step 9 UsageStats can close that gap.
+        Future.microtask(onShown);
+      } else {
+        restored = restored.tick(_now());
+      }
     }
     if (restored == null || !restored.isRunning) {
       if (restored != null) {
+        ref.read(sessionKeeperProvider).ended();
         final ended = restored;
         ref.read(prefsProvider).remove(_activeKey);
         // Providers may not modify other providers while building.
@@ -59,6 +64,7 @@ class FocusController extends Notifier<FocusState> {
       }
       return (active: null, lastEnded: restored, credited: null);
     }
+    _keepAlive(restored);
     _startTimer();
     return (active: restored, lastEnded: null, credited: null);
   }
@@ -80,6 +86,7 @@ class FocusController extends Notifier<FocusState> {
     }
     HapticFeedback.mediumImpact();
     ref.read(leaveAlertProvider).requestPermission();
+    _keepAlive(session);
     _set(session);
     _startTimer();
     return true;
@@ -104,8 +111,10 @@ class FocusController extends Notifier<FocusState> {
   @visibleForTesting
   Future<void> onShown() async {
     ref.read(leaveAlertProvider).ended();
-    if (state.active?.backgroundedAt == null) return;
+    // Always take: the log keeps the FIRST lock since the last take, so
+    // events from outside a session must not linger into the next one.
     final lock = await ref.read(screenLockProvider).take();
+    if (state.active?.backgroundedAt == null) return;
     _update(
       state.active?.resumed(
         _now(),
@@ -113,6 +122,26 @@ class FocusController extends Notifier<FocusState> {
         unlockedAt: lock.unlockedAt,
       ),
     );
+  }
+
+  /// Screen awake + the "Odaklanıyorsun" notification with what finishing pays.
+  void _keepAlive(FocusSession s) {
+    final best = ref
+        .read(cityProvider)
+        .boosted(rewardFor(s.planned, completed: true), completed: true);
+    final energy = best.energy + stakePayout(s.stake, completed: true);
+    ref
+        .read(sessionKeeperProvider)
+        .started(
+          s.startedAt,
+          s.plannedEnd,
+          subtitle: [
+            if (s.tag != null) tagLabel(s.tag),
+            '${s.planned.inMinutes} dk seans',
+            if (s.stake > 0) '${s.stake} Enerji sözleşme',
+          ].join(' · '),
+          goal: 'Bitirirsen +$energy Enerji · +${best.xp} XP',
+        );
   }
 
   void _startTimer() {
@@ -143,6 +172,7 @@ class FocusController extends Notifier<FocusState> {
 
   void _finish(FocusSession ended) {
     _timer?.cancel();
+    ref.read(sessionKeeperProvider).ended();
     ref.read(prefsProvider).remove(_activeKey);
     final paid = _credit(ended);
     ended.phase == FocusPhase.completed

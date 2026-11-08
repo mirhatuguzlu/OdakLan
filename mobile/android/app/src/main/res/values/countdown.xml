@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="countdown_alert">#FFE53935</color>
+    <!-- Same amber as the app's Enerji accent (AppColors.accent). -->
+    <color name="focus_accent">#FFF5A524</color>
+    <color name="focus_track">#40F5A524</color>
 </resources>

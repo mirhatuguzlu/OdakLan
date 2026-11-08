@@ -16,7 +16,8 @@ typedef LockEvents = ({DateTime? lockedAt, DateTime? unlockedAt});
 class ScreenLockEvents {
   static const _channel = MethodChannel('odaklan/screen_lock');
 
-  /// Returns and clears the latest lock/unlock times.
+  /// Returns and clears the first lock (and first unlock after it) since
+  /// the last call.
   Future<LockEvents> take() async {
     try {
       final map = await _channel.invokeMapMethod<String, Object?>(
@@ -90,3 +91,34 @@ class RewardNotice {
 }
 
 final rewardNoticeProvider = Provider<RewardNotice>((ref) => RewardNotice());
+
+/// While a session runs: screen kept awake, and on Android a foreground
+/// "Odaklanıyorsun" service so the system doesn't kill the app when locked.
+class SessionKeeper {
+  static const _channel = MethodChannel('odaklan/screen_lock');
+
+  Future<void> _call(String method, [Object? args]) async {
+    try {
+      await _channel.invokeMethod<void>(method, args);
+    } on MissingPluginException {
+      // Tests / unsupported platforms.
+    }
+  }
+
+  /// [subtitle] e.g. "Ders · 25 dk", [goal] what finishing pays.
+  Future<void> started(
+    DateTime startedAt,
+    DateTime plannedEnd, {
+    required String subtitle,
+    required String goal,
+  }) => _call('sessionStarted', {
+    'startMs': startedAt.millisecondsSinceEpoch,
+    'endMs': plannedEnd.millisecondsSinceEpoch,
+    'subtitle': subtitle,
+    'goal': goal,
+  });
+
+  Future<void> ended() => _call('sessionEnded');
+}
+
+final sessionKeeperProvider = Provider<SessionKeeper>((ref) => SessionKeeper());

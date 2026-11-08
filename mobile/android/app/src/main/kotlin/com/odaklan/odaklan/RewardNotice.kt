@@ -60,7 +60,7 @@ object RewardNotice {
         )
         manager.notify(
             NOTIFICATION_ID,
-            b.setSmallIcon(R.mipmap.ic_launcher)
+            b.setSmallIcon(R.drawable.ic_stat_focus)
                 .setContentTitle("⚡ +$energy Enerji toplandı")
                 .setContentText("Dün toplamayı unuttuğun görev ödüllerini senin için topladık.")
                 .setContentIntent(open)

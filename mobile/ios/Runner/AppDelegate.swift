@@ -3,11 +3,11 @@ import UIKit
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
-  // Latest screen lock/unlock times (epoch ms) since Dart last asked.
+  // First screen lock (and the first unlock after it) since Dart last asked, kept in
+  // UserDefaults so they survive iOS killing the app while locked.
   // Protected-data notifications fire only when the device has a passcode;
   // without one, locking is indistinguishable from leaving the app.
-  private var lockedAt: Int64?
-  private var unlockedAt: Int64?
+  private let defaults = UserDefaults.standard
 
   override func application(
     _ application: UIApplication,
@@ -17,11 +17,20 @@ import UIKit
     center.addObserver(
       forName: UIApplication.protectedDataWillBecomeUnavailableNotification,
       object: nil, queue: .main
-    ) { [weak self] _ in self?.lockedAt = Self.nowMs() }
+    ) { [weak self] _ in
+      // First lock only: a later glance at the lock screen must not overwrite it.
+      guard let self, self.defaults.object(forKey: "lockedAt") == nil else { return }
+      self.defaults.set(Self.nowMs(), forKey: "lockedAt")
+    }
     center.addObserver(
       forName: UIApplication.protectedDataDidBecomeAvailableNotification,
       object: nil, queue: .main
-    ) { [weak self] _ in self?.unlockedAt = Self.nowMs() }
+    ) { [weak self] _ in
+      // First unlock after that lock: when time away from the app started.
+      guard let self, self.defaults.object(forKey: "lockedAt") != nil,
+        self.defaults.object(forKey: "unlockedAt") == nil else { return }
+      self.defaults.set(Self.nowMs(), forKey: "unlockedAt")
+    }
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
@@ -32,13 +41,25 @@ import UIKit
       binaryMessenger: engineBridge.applicationRegistrar.messenger()
     )
     channel.setMethodCallHandler { [weak self] call, result in
-      guard let self, call.method == "takeLockEvents" else {
+      guard let self else { return result(FlutterMethodNotImplemented) }
+      switch call.method {
+      case "takeLockEvents":
+        result([
+          "lockedAt": self.defaults.object(forKey: "lockedAt") as Any,
+          "unlockedAt": self.defaults.object(forKey: "unlockedAt") as Any,
+        ])
+        self.defaults.removeObject(forKey: "lockedAt")
+        self.defaults.removeObject(forKey: "unlockedAt")
+      case "sessionStarted":
+        // Keep the screen awake during a session; the user may still lock it.
+        UIApplication.shared.isIdleTimerDisabled = true
+        result(nil)
+      case "sessionEnded":
+        UIApplication.shared.isIdleTimerDisabled = false
+        result(nil)
+      default:
         result(FlutterMethodNotImplemented)
-        return
       }
-      result(["lockedAt": self.lockedAt as Any, "unlockedAt": self.unlockedAt as Any])
-      self.lockedAt = nil
-      self.unlockedAt = nil
     }
   }
 

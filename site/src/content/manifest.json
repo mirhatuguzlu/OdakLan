@@ -209,7 +209,7 @@
     {
       "id": "focus_session",
       "title": "Odak Seansı",
-      "description": "Her 10 dakikalık odak 1 Enerji. Seansı bitirirsen +1 bonus Enerji ve iki kat XP.",
+      "description": "Her 10 dakikalık odak 1 Enerji. Seansı bitirirsen +1 bonus Enerji ve iki kat XP. Seans boyunca ekran açık kalır, kalan süre bildirimde ve kilit ekranında görünür.",
       "status": "ready"
     },
     {
