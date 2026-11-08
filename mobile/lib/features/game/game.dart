@@ -38,6 +38,10 @@ class SupabaseGameBackend implements GameBackend {
         body: {'action': action, 'tzOffsetMinutes': tzOffsetMinutes},
       );
       if (r.data case final Map<String, Object?> data) return data;
+    } on FunctionException catch (e) {
+      // Account deleted or session revoked: back to the sign-in screen.
+      if (e.status == 401) await _client.auth.signOut();
+      debugPrint('game: ${e.status}');
     } catch (e) {
       debugPrint('game: $e');
     }
