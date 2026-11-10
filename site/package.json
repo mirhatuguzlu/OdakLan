@@ -19,14 +19,14 @@
     "@eslint-react/eslint-plugin": "^5.28.8",
     "@next/eslint-plugin-next": "^16.4.5",
     "@tailwindcss/turbopack": "^4",
-    "@types/node": "^20",
+    "@types/node": "^26",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^10.14.0",
     "eslint-plugin-jsx-a11y-x": "^0.2.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "tailwindcss": "^4",
-    "typescript": "^5",
+    "typescript": "^7",
     "typescript-eslint": "^8.72.1"
   },
   "overrides": {
